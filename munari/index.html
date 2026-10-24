@@ -56,7 +56,8 @@ svg.cover .constellation{transform-origin:390px 193px;transform:scale(.968)}
   /* Birthday text first; 16 individually positioned, larger icons underneath. */
   svg.cover{width:min(100%,460px);height:auto;max-width:100%;}
   svg.cover .constellation{transform:none}
-  .date-imprint{transform:translateY(-5px)}
+  /* Center the ENTIRE date + infinity + age imprint as one group on mobile. */
+  .date-imprint{transform:translate(18.7px,-5px)}
 }
 @media(prefers-reduced-motion:reduce){.figure .moving{animation:none!important;transition:none!important}}
 @media(hover:none){.figure:not(.pinned):focus:not(:focus-visible) .wash{opacity:0}}
