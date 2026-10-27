@@ -281,14 +281,14 @@ html,body{overflow-x:hidden}
 .story-meta .story-up,.story-meta .story-down{text-align:center}
 .story-meta .story-roman{display:none}
 .page-berries{display:none!important}
-.page-diamonds{position:fixed;left:clamp(17px,2.7vw,37px);bottom:calc(clamp(17px,2.8vh,30px) + env(safe-area-inset-bottom));height:46px;display:flex;align-items:center;isolation:isolate;z-index:35}
-.page-diamond{appearance:none;flex:none;width:42px;height:42px;display:block;position:relative;padding:0;border:0;cursor:pointer;touch-action:manipulation;clip-path:polygon(50% 0%,100% 50%,50% 100%,0% 50%);transition:filter .16s ease,background .16s ease;outline:none}
-.page-diamond.previous{background:#87554b;z-index:2}
-.page-diamond.following{background:#87554b;margin-left:-19px;z-index:1}
-.page-diamond.previous .diamond-inside{position:absolute;inset:3px;clip-path:polygon(50% 0%,100% 50%,50% 100%,0% 50%);background:var(--wall)}
+.page-diamonds{position:fixed;left:clamp(17px,2.7vw,37px);bottom:calc(clamp(17px,2.8vh,30px) + env(safe-area-inset-bottom));height:46px;display:flex;align-items:center;isolation:isolate;z-index:35;filter:drop-shadow(0 1.5px 1px rgba(74,55,48,.10))}
+.page-diamond{appearance:none;flex:none;width:42px;height:42px;display:block;position:relative;padding:0;border:0;cursor:pointer;touch-action:manipulation;clip-path:polygon(50% 0%,100% 50%,50% 100%,0% 50%);transition:filter .16s ease,background .16s ease,transform .16s ease;outline:none}
+.page-diamond.previous{background:#6e564d;z-index:2}
+.page-diamond.following{background:#b08472;margin-left:-19px;z-index:1}
+.page-diamond.previous .diamond-inside{position:absolute;inset:4px;clip-path:polygon(50% 0%,100% 50%,50% 100%,0% 50%);background:#f3ebe0}
 .page-diamond.following .diamond-inside{display:none}
-.page-diamond:hover:not(:disabled){filter:brightness(1.23)}
-.page-diamond:focus-visible{filter:drop-shadow(0 0 3px #493138) brightness(1.35)}
+.page-diamond:hover:not(:disabled){filter:brightness(1.06) saturate(.96);transform:translateY(-1px)}
+.page-diamond:focus-visible{filter:drop-shadow(0 0 0 rgba(0,0,0,0)) drop-shadow(0 0 0.5px #f3ebe0) drop-shadow(0 0 3px rgba(110,86,77,.32));transform:translateY(-1px)}
 body.is-scroll-moving #specimenRack{opacity:0;pointer-events:none}
 body.is-scroll-moving .berry-rail,body.is-scroll-moving .shape-picker{pointer-events:none;opacity:.5}
 .story-track.is-moving .story-panel{pointer-events:none}
@@ -563,7 +563,7 @@ body.assembly #prodTorusExhibit #prodTorusAtlas .glued-edge-y{
   .art-ink{width:17px;height:17px;flex-basis:17px}
 }
 
-/* First gadget: a small clay stamping disk, never the product berries. */
+/* First gadget: original disk styling, harmonized by the final berry rules. */
 .berry-rail.stamp-tool{
   top:calc(clamp(18px,4.3vh,42px) + 8px);
 }
@@ -700,6 +700,113 @@ body.assembly #prodTorusExhibit #prodTorusAtlas .glued-edge-y{
   .berry-rail.stamp-tool{top:12px;right:10px}
   .berry-rail.stamp-tool #keepBerry{width:20px;height:20px}
 }
+/* Story I begins as a bare subspace experiment, not as a pottery workshop.
+   One ceramic disk unlocks Clay. Before that: a round Euclidean open U,
+   its restriction U ∩ A, no stamp dies, no pigments and no rotation grip. */
+body:not(.subspace-clay) #annulusExhibit #annulusNeighborhood{
+  fill:#A2B5A9!important;fill-opacity:.92!important;
+}
+body:not(.subspace-clay) #annulusExhibit #annulusPreIntersection{
+  fill:#688F84!important;fill-opacity:.94!important;
+}
+body:not(.subspace-clay) #annulusRotateGrip{display:none!important}
+body:not(.subspace-clay) #annulusPreMemories,
+body:not(.subspace-clay) #annulusAmbientMemories{display:none!important}
+/* A hollow ceramic circle brings Story I back to its plain subspace view.
+   The larger transparent button leaves an easy tap target on mobile. */
+#subspaceBack{
+  appearance:none;display:grid;place-items:center;
+  flex:0 0 31px;width:31px;height:31px;
+  padding:0;margin-left:3px;border:0;border-radius:50%;
+  background:transparent;color:inherit;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+#subspaceBack::before{
+  content:"";display:block;box-sizing:border-box;
+  width:18px;height:18px;border-radius:50%;
+  border:2.5px solid #A96F5A;background:transparent;
+  transition:border-color .16s ease,background-color .16s ease,transform .16s ease;
+}
+#subspaceBack:hover::before{border-color:#7C5D50;background:rgba(169,111,90,.10)}
+#subspaceBack:active::before{transform:scale(.90)}
+#subspaceBack:focus-visible{outline:2px solid #7E9F9A;outline-offset:1px}
+@media(max-width:860px){
+  #subspaceBack{flex-basis:29px;width:29px;height:29px;margin-left:1px}
+  #subspaceBack::before{width:17px;height:17px;border-width:2.3px}
+}
+
+/* Pilemma's paired diamonds: ONLY mobile uses explicit pagination.
+   Turning a page can no longer compete with the draggable mathematics. */
+.page-diamonds{display:none!important}
+@media(max-width:860px){
+  html,body{height:100%;overflow:hidden;overscroll-behavior:none}
+  .sheet{touch-action:none;cursor:default;overscroll-behavior:none}
+  .page-diamonds{display:flex!important}
+  .page-diamond{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+  /* Let the mathematical instruments, and only them, own drag gestures. */
+  .story-panel,.story-track{touch-action:none}
+}
+
+/* Mobile landscape: the fourth microscope must not inherit portrait stacking.
+   A short phone screen used to squeeze its square SVG to 38svh while the
+   square itself spilled across the horizontal divider and into the circles.
+   Restore a two-column board and preserve both SVG viewBox proportions. */
+@media (orientation:landscape) and (max-height:520px) and (max-width:1024px){
+  .story-panel[data-story="3"] #prodTorusExhibit .torus-pair{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+    grid-template-rows:minmax(0,1fr);
+    align-items:center;
+    gap:clamp(8px,1.7vw,16px);
+  }
+  .story-panel[data-story="3"] #prodTorusExhibit .torus-pair::after{
+    left:50%;right:auto;top:8px;bottom:8px;
+    width:1.5px;height:auto;transform:translateX(-50%);
+  }
+  .story-panel[data-story="3"] #prodTorusExhibit .space{
+    min-height:0;min-width:0;height:100%;padding:4px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .story-panel[data-story="3"] #prodTorusAtlas,
+  .story-panel[data-story="3"] #prodTorusFactors{
+    flex:none;
+    display:block;
+    width:min(100%,60svh);
+    height:auto;
+    max-width:100%;max-height:none;
+    aspect-ratio:372 / 320;
+    margin:auto;
+  }
+  .story-panel[data-story="3"] #prodTorusFactors{aspect-ratio:370 / 320;transform:none;}
+}
+/* A large phone in landscape can be wider than the portrait breakpoint.
+   Keep explicit diamond pagination and a stationary backdrop on touch phones. */
+@media (orientation:landscape) and (max-height:520px) and (pointer:coarse){
+  html,body{height:100%;overflow:hidden;overscroll-behavior:none}
+  .sheet{touch-action:none;cursor:default;overscroll-behavior:none}
+  .page-diamonds{display:flex!important}
+  .page-diamond{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+  .story-panel,.story-track{touch-action:none}
+}
+
+/* Uniform raspberry grammar throughout all four stories.
+   The hollow berry toggles Clay, the solid berry preserves an impression.
+   There is no extra subspace-return button in the stamp palette. */
+.berry-rail.stamp-tool #keepBerry{
+  width:30px;height:30px;border:2px solid #A77A6B;
+  border-radius:50%;background:#A77A6B;
+}
+.berry-rail.stamp-tool #unionBerry{
+  background:#F4EEE5;border:2px solid #A77A6B;
+  margin-left:-8px;
+}
+.berry-rail.stamp-tool #unionBerry.select{background:#DEC7BB}
+.berry-rail.stamp-tool #keepBerry[aria-disabled="true"]{opacity:.42;cursor:default}
+@media(max-width:860px){
+  .berry-rail.stamp-tool #keepBerry,
+  .berry-rail.stamp-tool #unionBerry{width:29px;height:29px}
+  .berry-rail.stamp-tool #unionBerry{margin-left:-7px}
+}
 </style>
 </head>
 <body>
@@ -827,6 +934,10 @@ body.assembly #prodTorusExhibit #prodTorusAtlas .glued-edge-y{
 </div>
 </div>
 </main>
+<nav class="page-diamonds" aria-label="Mobile story navigation">
+  <button id="previousDiamond" class="page-diamond previous" type="button" aria-label="Previous story" title="Previous story"><span class="diamond-inside" aria-hidden="true"></span></button>
+  <button id="nextDiamond" class="page-diamond following" type="button" aria-label="Next story" title="Next story"><span class="diamond-inside" aria-hidden="true"></span></button>
+</nav>
 <div class="shape-picker" id="shapePicker" aria-label="Open shapes">
     <div class="stamp-dies" role="group" aria-label="Choose a ceramic stamp">
     <button type="button" class="shape-pick active" data-shape="amoeba" aria-label="Little cloud"><svg viewBox="0 0 40 40"><path d="M7 21C5 10 16 8 21 11C31 5 37 15 32 22C36 30 27 35 20 31C13 36 5 30 7 21Z" fill="#d8c08a"/></svg></button>
@@ -837,11 +948,11 @@ body.assembly #prodTorusExhibit #prodTorusAtlas .glued-edge-y{
     <button type="button" class="shape-pick" data-shape="ring" aria-label="Hollow little cloud stamp"><svg viewBox="0 0 40 40" role="img" aria-label="Hollow irregular cloud"><path d="M35.1 20.3 C34 11.4 25.3 6.1 17.3 6.3 C8.4 6.5 4.8 12.2 4.3 20.9 C3.7 29.6 11.3 34.5 20.8 34.8 C30.4 35 36.4 27.7 35.1 20.3 Z M26.9 20.5 C25.9 16.6 22.1 13.3 18.1 14.5 C14.2 15.8 12.9 19.2 13.7 22.4 C14.5 25.2 19 27 22.9 26 C26 25.2 27.8 23.5 26.9 20.5 Z" fill="#d8c08a" fill-rule="evenodd"/></svg></button>
     <button type="button" class="shape-pick" data-shape="petals" aria-label="Little flower stamp" title="Little flower"><svg viewBox="0 0 40 40"><g fill="#A96F5A"><ellipse cx="20" cy="10" rx="4" ry="6"/><ellipse cx="20" cy="30" rx="4" ry="6"/><ellipse cx="10" cy="20" rx="6" ry="4"/><ellipse cx="30" cy="20" rx="6" ry="4"/><ellipse cx="12.9" cy="12.9" rx="4" ry="5" transform="rotate(-45 12.9 12.9)"/><ellipse cx="27.1" cy="12.9" rx="4" ry="5" transform="rotate(45 27.1 12.9)"/><ellipse cx="12.9" cy="27.1" rx="4" ry="5" transform="rotate(45 12.9 27.1)"/><ellipse cx="27.1" cy="27.1" rx="4" ry="5" transform="rotate(-45 27.1 27.1)"/><circle cx="20" cy="20" r="5.2"/></g></svg></button>
     <button type="button" class="shape-pick" data-shape="diamond" aria-label="Diamond stamp" title="Diamond"><svg viewBox="0 0 40 40"><path d="M20 4L35 20L20 36L5 20Z" fill="#A96F5A"/></svg></button>
-    <button type="button" class="shape-pick" data-shape="diamond-hollow" aria-label="Hollow diamond stamp" title="Hollow diamond"><svg viewBox="0 0 40 40"><path d="M20 4L35 20L20 36L5 20Z M20 13L11.8 20L20 27L28.2 20Z" fill="#A96F5A" fill-rule="evenodd"/></svg></button>
     <button type="button" class="shape-pick" data-shape="mesa" aria-label="Stepped mesa stamp" title="Stepped mesa"><svg viewBox="0 0 40 40"><path d="M15 5H25V12H30V19H36V34H4V19H10V12H15Z" fill="#A96F5A"/></svg></button>
     <button type="button" class="shape-pick" data-shape="zigzag" aria-label="Double zigzag stamp" title="Double zigzag"><svg viewBox="0 0 40 40"><path d="M3 7L11.5 14L20 7L28.5 14L37 7V12L28.5 19L20 12L11.5 19L3 12Z M3 22L11.5 29L20 22L28.5 29L37 22V27L28.5 34L20 27L11.5 34L3 27Z" fill="#A96F5A"/></svg></button>
     </div>
     <button type="button" id="artModeSwitch" aria-label="Choose stamp colours" aria-pressed="false" title="Choose stamp colours">COLORS</button>
+    
     <div id="artInkTray" role="group" aria-label="Santa Fe ceramic ink colours" hidden>
       <button type="button" class="art-ink" data-art-ink="0" style="--ink:#EFE4D6" title="Bone Paper" aria-label="Bone Paper ink" aria-pressed="true"></button>
       <button type="button" class="art-ink" data-art-ink="1" style="--ink:#F6EBDD" title="Warm Cream" aria-label="Warm Cream ink" aria-pressed="false"></button>
@@ -864,10 +975,7 @@ body.assembly #prodTorusExhibit #prodTorusAtlas .glued-edge-y{
   <div class="berries"><button id="keepBerry" class="berry select" aria-label="Save basis open set" title="Save"></button><button id="unionBerry" class="berry" aria-label="Union mode" title="Union"></button></div>
 </div>
 <div id="specimenRack" class="specimen-rack" aria-label="Saved basis elements"></div>
-<nav class="page-diamonds" aria-label="Cycle through framed mathematical stories">
-  <button type="button" class="page-diamond previous" id="prev" aria-label="Previous mathematical pair" title="Previous pair"><span class="diamond-inside" aria-hidden="true"></span></button>
-  <button type="button" class="page-diamond following" id="next" aria-label="Next mathematical pair" title="Next pair"><span class="diamond-inside" aria-hidden="true"></span></button>
-</nav>
+
 <script>
 (()=>{
 'use strict';
@@ -886,6 +994,8 @@ let scrollOffsetPx=0;
 let slideFallback=null;
 let backgroundDrag=null;
 let activeStoryId=0;
+// Independent studios retain their open sets and selected mode while the visitor turns pages.
+const savedStoryUnionMode={4:false,6:false};
 const panelGap=()=>parseFloat(getComputedStyle(storyTrack).columnGap)||0;
 function panelSpan(p){return p.getBoundingClientRect().width+panelGap();}
 function setScrollOffset(immediate=false){
@@ -920,7 +1030,13 @@ function keepLoopFilled(){
   for(let i=0;i<storyPanels.length+2;i++){
     const first=storyTrack.firstElementChild;
     if(first.getBoundingClientRect().right<0){moveFirstToEnd();continue;}
-    if(first.getBoundingClientRect().left>panelGap()){moveLastToFront();continue;}
+    // A narrow page centered on a wide tablet naturally leaves a side gutter.
+    // That gutter is not a request to rotate the infinite picture scroll.
+    // Allow the centered margin (plus a small tolerance) before wrapping.
+    const centeredGutter=Math.max(0,(window.innerWidth-first.getBoundingClientRect().width)/2);
+    if(first.getBoundingClientRect().left>Math.max(panelGap(),centeredGutter+16)){
+      moveLastToFront();continue;
+    }
     break;
   }
 }
@@ -936,7 +1052,12 @@ function syncCurrentPage(){
   const p=centeredPanel();
   activeStoryId=+p.dataset.story;
   const nextPage=panelPageMap[activeStoryId];
-  if(nextPage!==page)resetGadgetsForNewStory();
+  if(nextPage!==page){
+    // Navigation must not discard stamps, saved basis elements, or the current
+    // neighborhood. Keep clay/cut selection independently for each product story.
+    if(page===4||page===6)savedStoryUnionMode[page]=unionMode;
+    unionMode=nextPage===4||nextPage===6 ? savedStoryUnionMode[nextPage] : false;
+  }
   page=nextPage;
   controlsRefresh();
   paintAllUnions();
@@ -991,20 +1112,54 @@ function flip(direction){
 storyTrack.addEventListener('transitionend',e=>{
   if(e.target===storyTrack&&e.propertyName==='transform')finishStorySlide();
 });
-$('prev').addEventListener('click',()=>flip(-1));
-$('next').addEventListener('click',()=>flip(1));
 document.addEventListener('keydown',e=>{
   if(e.altKey||e.ctrlKey||e.metaKey||['INPUT','TEXTAREA'].includes(document.activeElement.tagName))return;
   if(e.key==='ArrowRight'){flip(1);e.preventDefault();}
   if(e.key==='ArrowLeft'){flip(-1);e.preventDefault();}
 });
-// Free horizontal paper drag ONLY outside the colored mathematical windows.
-// Unlike the diamonds this never snaps: the reader can stop between stories.
+// Hover + wheel / two-finger trackpad scrolls the desktop emakimono.
+// A vertical wheel directly on a mathematical instrument remains reserved for
+// changing its neighborhood; a horizontal trackpad gesture scrolls the gallery
+// even over an instrument. Mobile keeps its stationary, diamond-paged board.
+const desktopScrollWheel=window.matchMedia('(min-width:861px) and (hover:hover) and (pointer:fine)');
+sheet.addEventListener('wheel',e=>{
+  if(!desktopScrollWheel.matches||e.ctrlKey||e.metaKey||e.altKey||backgroundDrag)return;
+  const horizontal=Math.abs(e.deltaX)>Math.abs(e.deltaY)*.7 && Math.abs(e.deltaX)>0;
+  // Wheel zoom is intentionally local to the active mathematical controls.
+  // On the unmarked portions of an SVG the same wheel can turn the scroll.
+  if(!horizontal){
+    const instrument=e.target.closest('svg.instrument');
+    if(instrument){
+      const id=instrument.id;
+      if(['annulusPre','annulusAmbient','intervalDiagram','quotCircle'].includes(id))return;
+      if(id==='prodSquareAtlas' && e.target.closest('[data-product-role], [data-wheel-axis]'))return;
+      if(id==='prodTorusAtlas' && e.target.closest('[data-product-role]'))return;
+      if(id==='prodTorusFactors' && e.target.closest('[data-factor-role]'))return;
+    }
+  }
+  if(e.target.closest('button, a, input, textarea, select, .stamp-dies, .art-ink'))return;
+  const raw=horizontal?e.deltaX:e.deltaY;
+  const pixels=raw*(e.deltaMode===1?17:e.deltaMode===2?window.innerWidth*.8:1);
+  if(!Number.isFinite(pixels)||Math.abs(pixels)<.01)return;
+  e.preventDefault();
+  e.stopPropagation(); // horizontal trackpad gestures never resize open sets
+  stopAnimation();
+  scrollOffsetPx+=clamp(pixels*1.25,-380,380);
+  setScrollOffset(true);
+  keepLoopFilled();
+  if(+centeredPanel().dataset.story!==activeStoryId)syncCurrentPage();
+},{passive:false,capture:true});
+
+// Desktop retains its picture-scroll drag; mobile's board is fixed.
+// On mobile, only the paired diamonds may change stories. No swipes.
+$('previousDiamond').addEventListener('click',()=>flip(-1));
+$('nextDiamond').addEventListener('click',()=>flip(1));
 sheet.addEventListener('pointerdown',e=>{
+  if(window.matchMedia('(max-width:860px), (orientation:landscape) and (max-height:520px) and (pointer:coarse)').matches)return;
   if(e.pointerType==='mouse'&&e.button!==0)return;
   if(e.target.closest('.space, svg.instrument, button, a, .paper-open-set, .specimen, .berry-rail, .shape-picker'))return;
   stopAnimation();
-  backgroundDrag={id:e.pointerId,x:e.clientX,start:scrollOffsetPx};
+  backgroundDrag={id:e.pointerId,x:e.clientX,start:scrollOffsetPx,mobile:window.matchMedia('(max-width:860px), (orientation:landscape) and (max-height:520px) and (pointer:coarse)').matches};
   storyTrack.style.transition='none';
   sheet.classList.add('is-hand-dragging');
   try{sheet.setPointerCapture(e.pointerId);}catch(err){}
@@ -1022,11 +1177,17 @@ sheet.addEventListener('pointermove',e=>{
 });
 function endBackgroundDrag(e){
   if(!backgroundDrag||e.pointerId!==backgroundDrag.id)return;
+  const wasMobile=backgroundDrag.mobile;
   backgroundDrag=null;
   sheet.classList.remove('is-hand-dragging');
   storyTrack.style.transition='';
   keepLoopFilled();
-  syncCurrentPage();
+  if(wasMobile){
+    // Only the mobile story scroll snaps; drags inside the SVGs stay independent.
+    animateToPanel(centeredPanel());
+  }else{
+    syncCurrentPage();
+  }
 }
 sheet.addEventListener('pointerup',endBackgroundDrag);
 sheet.addEventListener('pointercancel',endBackgroundDrag);
@@ -1064,10 +1225,6 @@ function blobPath(b,scale=1,steps=180){
 // not copies of particular community-specific or ceremonial designs.
 const potteryPolygons={
   diamond:[[[0,-.91],[.84,0],[0,.91],[-.84,0]]],
-  'diamond-hollow':[
-    [[0,-.91],[.84,0],[0,.91],[-.84,0]],
-    [[0,-.40],[-.37,0],[0,.40],[.37,0]] // reverse winding for a hole
-  ],
   mesa:[[
     [-.30,-.85],[.30,-.85],[.30,-.52],[.54,-.52],
     [.54,-.20],[.88,-.20],[.88,.72],[-.88,.72],
@@ -1104,6 +1261,14 @@ function shapePath(b){
     }
     return d+'Z ';
   };
+  if(b.kind==='plain'){
+    let d='';
+    for(let i=0;i<192;i++){
+      const t=TAU*i/192;
+      d+=(i?'L':'M')+(b.x+b.r*Math.cos(t)).toFixed(2)+' '+(b.y+b.r*Math.sin(t)).toFixed(2)+' ';
+    }
+    return d+'Z';
+  }
   if(!b.kind || b.kind==='amoeba') return blobPath(b,1,240);
   if(b.kind==='ring'){
     return ellipse(b.x,b.y,b.r*1.06*b.sx,b.r*.98*b.sy,.7)
@@ -1157,6 +1322,7 @@ function insideShape(b,p){
     const w=1+.029*Math.sin(3*theta+phase)+.022*Math.cos(5*theta-phase);
     return Math.hypot(x,y)<w;
   };
+  if(b.kind==='plain') return Math.hypot(p.x-b.x,p.y-b.y)<b.r;
   if(!b.kind || b.kind==='amoeba') return insideBlob(b,p);
   if(b.kind==='ring'){
     return ell(b.x,b.y,b.r*1.06*b.sx,b.r*.98*b.sy,.7)
@@ -1189,9 +1355,7 @@ function insideShape(b,p){
   }
   if(potteryPolygons[b.kind]){
     const shapes=potteryPolygons[b.kind];
-    return b.kind==='diamond-hollow'
-      ? stampInPolygon(b,p,shapes[0])&&!stampInPolygon(b,p,shapes[1])
-      : shapes.some(poly=>stampInPolygon(b,p,poly));
+    return shapes.some(poly=>stampInPolygon(b,p,poly));
   }
   return insideBlob(b,p);
 }
@@ -1246,9 +1410,9 @@ function attachBlobInteraction(svg, blob, render, hitId){
   svg.addEventListener('pointerdown',e=>{
     if(unionMode && page===6)return;
     if(e.pointerType==='mouse'&&e.button!==0)return;
-    const p=point(e,svg), mode=blobPointerMode(p,blob,svg);
-    const isRotateGrip=blob===annBlob && !!e.target.closest('#annulusRotateGrip');
-    if(isRotateGrip || (blob===annBlob&&e.altKey)){
+    const p=point(e,svg), mode=blobPointerMode(p,interactionShape(blob),svg);
+    const isRotateGrip=blob===annBlob && subClayMode && !!e.target.closest('#annulusRotateGrip');
+    if(isRotateGrip || (blob===annBlob&&subClayMode&&e.altKey)){
       drag={mode:'rotate',startAngle:Math.atan2(p.y-blob.y,p.x-blob.x),
         startRotation:blob.rotation||0};
       svg.setPointerCapture(e.pointerId);e.preventDefault();return;
@@ -1260,7 +1424,7 @@ function attachBlobInteraction(svg, blob, render, hitId){
   svg.addEventListener('pointermove',e=>{
     const p=point(e,svg);
     if(!drag){
-      const mode=blobPointerMode(p,blob,svg);
+      const mode=blobPointerMode(p,interactionShape(blob),svg);
       svg.style.cursor=mode==='resize'?'nwse-resize':mode==='move'?'grab':'crosshair';
       return;
     }
@@ -1270,13 +1434,14 @@ function attachBlobInteraction(svg, blob, render, hitId){
       blob.rotation=drag.startRotation+da*180/PI;
     }else if(drag.mode==='resize'){
       const local=stampLocalPoint(blob,p);
-      blob.r=clamp(Math.hypot((local.x-blob.x)/blob.sx,(local.y-blob.y)/blob.sy),22,320);
+      const shape=interactionShape(blob);
+      blob.r=clamp(Math.hypot((local.x-blob.x)/shape.sx,(local.y-blob.y)/shape.sy),22,320);
     }else {blob.x=clamp(p.x-drag.dx,-55,535); blob.y=clamp(p.y-drag.dy,-55,440);}
     render();
   });
   function end(){drag=null; svg.style.cursor='';}
   svg.addEventListener('pointerup',end); svg.addEventListener('pointercancel',end); svg.addEventListener('lostpointercapture',end);
-  svg.addEventListener('wheel',e=>{e.preventDefault(); if(blob===annBlob&&e.shiftKey){blob.rotation=(blob.rotation||0)-Math.sign(e.deltaY)*5;}else blob.r=clamp(blob.r*wheelRatio(e),22,320); render();},{passive:false});
+  svg.addEventListener('wheel',e=>{e.preventDefault(); if(blob===annBlob&&subClayMode&&e.shiftKey){blob.rotation=(blob.rotation||0)-Math.sign(e.deltaY)*5;}else blob.r=clamp(blob.r*wheelRatio(e),22,320); render();},{passive:false});
 }
 // Page 1: circle as subspace
 // Page 2: quotient circle and interval preimage
@@ -1321,8 +1486,14 @@ function endArcDrag(){arcDrag=null; quot.style.cursor='';}
 quot.addEventListener('pointerup',endArcDrag); quot.addEventListener('pointercancel',endArcDrag); quot.addEventListener('lostpointercapture',endArcDrag);
 for(const svg of [quot,$('intervalDiagram')]) svg.addEventListener('wheel',e=>{e.preventDefault(); half=clamp(half*wheelRatio(e),.19,PI-.18); renderQuotient();},{passive:false});
 
-// Page 3: annulus as subspace, fill only, no boundary stroke
+// Story I: the original subspace demonstration becomes an optional stamp studio.
 const annBlob={kind:'amoeba',x:314,y:146,r:82,sx:1.16,sy:.98,rotation:0,p1:1.0,p2:-.3,p3:.6};
+let subClayMode=false;
+function interactionShape(b){
+  return b===annBlob && !subClayMode
+    ? {...b,kind:'plain',sx:1,sy:1,rotation:0}
+    : b;
+}
 // Make one canonical SVG outline centered at the origin.  Moving the paper
 // changes only a lightweight translation, not three long d= path strings.
 // This avoids stale paint tiles along the edge of the clipped SVG in Safari.
@@ -1340,8 +1511,9 @@ function paintAnnulusSaved(){
   }
 }
 function renderAnnulus(){
-  const p=shapePath({...annBlob,x:0,y:0});
-  const transform=`translate(${annBlob.x} ${annBlob.y}) rotate(${annBlob.rotation||0})`;
+  const source=interactionShape(annBlob);
+  const p=shapePath({...source,x:0,y:0});
+  const transform=`translate(${annBlob.x} ${annBlob.y}) rotate(${subClayMode?(annBlob.rotation||0):0})`;
   for(const id of ['annulusNeighborhood','annulusPreIntersection','annulusHitBlob']){
     const el=$(id);
     if(p!==annulusOutline)el.setAttribute('d',p);
@@ -1360,14 +1532,14 @@ function renderAnnulus(){
   stem.setAttribute('cy',annBlob.y+Math.sin(theta)*(len-14)*annBlob.sy);
 }
 attachBlobInteraction($('annulusAmbient'),annBlob,renderAnnulus,'annulusHitBlob');
-$('annulusPre').addEventListener('wheel',e=>{e.preventDefault(); if(e.shiftKey)annBlob.rotation=(annBlob.rotation||0)-Math.sign(e.deltaY)*5;else annBlob.r=clamp(annBlob.r*wheelRatio(e),22,320); renderAnnulus();},{passive:false});
+$('annulusPre').addEventListener('wheel',e=>{e.preventDefault(); if(subClayMode&&e.shiftKey)annBlob.rotation=(annBlob.rotation||0)-Math.sign(e.deltaY)*5;else annBlob.r=clamp(annBlob.r*wheelRatio(e),22,320); renderAnnulus();},{passive:false});
 
 // PRODUCT TOPOLOGY: basic opens U×V = π₁⁻¹(U) ∩ π₂⁻¹(V).
 // SQUARE: I×I; CYLINDER: S¹×I; TORUS: S¹×S¹.
 // The coordinate charts use the quotient seams consistently: s=0~1 iff cyclic.
 const productModels={
   Square:{s:.49,t:.58,rs:.22,rt:.22,cyclicS:false,cyclicT:false},
-  Torus:{s:.025,t:.035,rs:.16,rt:.20,cyclicS:true,cyclicT:true}
+  Torus:{s:0,t:0,rs:.16,rt:.20,cyclicS:true,cyclicT:true}
 };
 function productIntervals(c,r,cyclic){
   if(!cyclic)return [[clamp(c-r,0,1),clamp(c+r,0,1)]];
@@ -1505,7 +1677,7 @@ const artInkColors=[
 ];
 let artMode=false, selectedArtInk=0;
 function refreshArtMode(){
-  const active=artMode && page===2;
+  const active=subClayMode && artMode && page===2;
   const toggle=$('artModeSwitch'),tray=$('artInkTray');
   toggle.textContent='COLORS';
   toggle.setAttribute('aria-pressed',String(active));
@@ -1523,17 +1695,17 @@ function syncAnnulusPreviewInk(){
   if(!preview)return;
   // The hovering, not-yet-fired stamp stays the original paper white.
   // AUTO / ART only determines the colour once the impression is saved.
-  preview.style.fill='#EFE4D6';
+  preview.style.fill=subClayMode?'#EFE4D6':'#688F84';
   preview.style.fillOpacity='1';
 }
 $('artModeSwitch').addEventListener('click',()=>{
-  if(page!==2)return;
+  if(page!==2||!subClayMode)return;
   artMode=!artMode;
   refreshArtMode();
 });
 for(const inkButton of document.querySelectorAll('#artInkTray .art-ink')){
   inkButton.addEventListener('click',()=>{
-    if(page!==2)return;
+    if(page!==2||!subClayMode)return;
     selectedArtInk=+inkButton.dataset.artInk;
     artMode=true;
     refreshArtMode();
@@ -1810,10 +1982,11 @@ function resetGadgetsForNewStory(){
   Object.assign(annBlob,{kind:'amoeba',x:314,y:146,r:82,sx:1.16,sy:.98,rotation:0,p1:1.0,p2:-.3,p3:.6});
   annulusOutline='';
   Object.assign(productModels.Square,{s:.49,t:.58,rs:.22,rt:.22});
-  Object.assign(productModels.Torus,{s:.025,t:.035,rs:.16,rt:.20});
+  Object.assign(productModels.Torus,{s:0,t:0,rs:.16,rt:.20});
   for(const key of Object.keys(cabinets))cabinets[key].length=0;
   inkQueue[4]=[]; inkQueue[6]=[];
   artMode=false;selectedArtInk=0;
+  subClayMode=false;
   torusFreshCutId=null;
   unionMode=false;
   serial=0;
@@ -1826,30 +1999,42 @@ function resetGadgetsForNewStory(){
 }
 
 function controlsRefresh(){
+  const first=page===2;
   const productActive=page>=4;
-  const collectible=(page===2)||productActive;
-  if(page<4) unionMode=false;
+  const collectible=first||productActive;
+  if(page<4)unionMode=false;
   $('berryRail').hidden=!collectible;
-  $('berryRail').classList.toggle('stamp-tool',page===2);
-  $('keepBerry').setAttribute('aria-label',page===2?'Stamp current open set onto the annulus':'Save basis open set');
-  $('keepBerry').title=page===2?'Stamp onto annulus':'Save';
+  // The exact same pair of ceramic berries now lives in every studio.
+  // Solid = keep a cut / stamp; hollow = Clay, which toggles back to Cut.
+  $('berryRail').classList.toggle('stamp-tool',first);
+  $('keepBerry').setAttribute('aria-label',first?'Stamp current open set onto the annulus':'Save basis open set');
+  $('keepBerry').title=first?'Stamp / save impression':'Save';
+  $('keepBerry').setAttribute('aria-pressed',String(first && subClayMode));
   $('keepBerry').classList.toggle('select',collectible&&!unionMode);
-  $('unionBerry').classList.toggle('select',productActive&&unionMode);
-  $('unionBerry').hidden=!productActive || page===2;
-  $('unionBerry').setAttribute('aria-pressed',String(productActive&&unionMode));
+  $('unionBerry').classList.toggle('select',(first&&subClayMode)||(productActive&&unionMode));
+  $('unionBerry').hidden=!collectible;
+  $('unionBerry').setAttribute('aria-label',first
+    ? (subClayMode?'Return to simple Subspace view':'Enter Clay stamping mode')
+    : (unionMode?'Return to Cut mode':'Enter Clay mode'));
+  $('unionBerry').title=first
+    ? (subClayMode?'Subspace · simple view':'Clay · stamps and colors')
+    : (unionMode?'Cut / basis':'Clay / assemble');
+  $('unionBerry').setAttribute('aria-pressed',String((first&&subClayMode)||(productActive&&unionMode)));
   document.body.classList.toggle('assembly',productActive&&unionMode);
   const blob=pageForShape[page],hasShape=!!blob;
-  $('shapePicker').classList.toggle('visible',hasShape);
+  $('shapePicker').classList.toggle('visible',hasShape&&subClayMode);
+  document.body.classList.toggle('subspace-clay',first&&subClayMode);
   refreshArtMode();
-  $('unionBerry').style.opacity=productActive?'1':'.55';
-  $('keepBerry').style.opacity=collectible?(unionMode?'.32':'.82'):'.82';
-  $('keepBerry').setAttribute('aria-disabled', String(productActive&&unionMode));
+  $('unionBerry').style.opacity=collectible?'1':'.55';
+  const cannotKeep=(productActive&&unionMode)||(first&&!subClayMode);
+  $('keepBerry').style.opacity=cannotKeep?'.42':'.95';
+  $('keepBerry').setAttribute('aria-disabled',String(cannotKeep));
   for(const el of document.querySelectorAll('.shape-pick'))el.classList.toggle('active',hasShape&&el.dataset.shape===(blob.kind||'amoeba'));
   if(page===6)rackRefresh();else $('specimenRack').replaceChildren();
 }
 function saveCurrent(){
   let value=null;
-  if(pageForShape[page])value=deepCopy(pageForShape[page]);
+  if(pageForShape[page]&&subClayMode)value=deepCopy(pageForShape[page]);
   else if(page===4)value=deepCopy(productModels.Square);
   else if(page===6)value=deepCopy(productModels.Torus);
   if(!value)return;
@@ -1886,18 +2071,28 @@ function saveCurrent(){
   rackRefresh();
 }
 $('keepBerry').addEventListener('click',()=>{
-  if((page!==2 && page<4)||unionMode)return;
+  if(unionMode)return;
+  // Waking Clay and printing a stamp are deliberately two actions.
+  if(page===2&&!subClayMode)return;
+  if(page!==2 && page<4)return;
   saveCurrent();
 });
 $('unionBerry').addEventListener('click',()=>{
+  if(page===2){
+    // Hollow berry is the mode switch, on this page as on the product pages.
+    subClayMode=!subClayMode;
+    annulusOutline='';
+    renderAnnulus();controlsRefresh();
+    return;
+  }
   if(page<4)return;
-  if(!unionMode)chooseClayFor(page); // entering the hands-on clay mode
+  if(!unionMode)chooseClayFor(page);
   if(page===6)torusFreshCutId=null;
   unionMode=!unionMode;
   controlsRefresh();paintAllUnions();
 });
 for(const el of document.querySelectorAll('.shape-pick'))el.addEventListener('click',()=>{
-  const b=pageForShape[page];if(!b)return;
+  const b=pageForShape[page];if(!b||!subClayMode)return;
   b.kind=el.dataset.shape;
   if(page===2)renderAnnulus();
   controlsRefresh();
