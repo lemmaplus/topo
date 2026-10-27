@@ -807,6 +807,29 @@ body:not(.subspace-clay) #annulusAmbientMemories{display:none!important}
   .berry-rail.stamp-tool #unionBerry{width:29px;height:29px}
   .berry-rail.stamp-tool #unionBerry{margin-left:-7px}
 }
+
+/* Desktop-only: shorten the coloured surround, never the mathematics.
+   Preserve the full grid cell and SVG geometry so nothing shrinks or shifts. */
+@media(min-width:861px) and (hover:hover) and (pointer:fine){
+  .story-panel .space{position:relative;background:transparent!important;--math-window-trim:8.5%}
+  .story-panel .space::before{
+    content:"";position:absolute;z-index:0;pointer-events:none;
+    left:0;right:0;top:var(--math-window-trim);bottom:var(--math-window-trim);
+    background:var(--math-window-bg);
+  }
+  .story-panel .space > svg.instrument{position:relative;z-index:1}
+  .story-panel .spaces::after,.story-panel .torus-pair::after{
+    top:calc(8.5% + 8px);bottom:calc(8.5% + 8px);
+  }
+  .story-panel[data-story="0"] .space:first-child{--math-window-bg:#E8DED0}
+  .story-panel[data-story="0"] .space:last-child{--math-window-bg:#F4EFE5}
+  .story-panel[data-story="1"] .space:first-child{--math-window-bg:#a46f59}
+  .story-panel[data-story="1"] .space:last-child{--math-window-bg:#eadbb8}
+  .story-panel[data-story="2"] .space:first-child{--math-window-bg:#C6ACAA}
+  .story-panel[data-story="2"] .space:last-child{--math-window-bg:#D3B8AC}
+  .story-panel[data-story="3"] .space:first-child{--math-window-bg:#5d4350}
+  .story-panel[data-story="3"] .space:last-child{--math-window-bg:#734f46}
+}
 </style>
 </head>
 <body>
@@ -1117,32 +1140,31 @@ document.addEventListener('keydown',e=>{
   if(e.key==='ArrowRight'){flip(1);e.preventDefault();}
   if(e.key==='ArrowLeft'){flip(-1);e.preventDefault();}
 });
-// Hover + wheel / two-finger trackpad scrolls the desktop emakimono.
-// A vertical wheel directly on a mathematical instrument remains reserved for
-// changing its neighborhood; a horizontal trackpad gesture scrolls the gallery
-// even over an instrument. Mobile keeps its stationary, diamond-paged board.
+// The emaki and the mathematical workbenches have separate spatial domains.
+// When the pointer is over either coloured window, ALL wheel gestures stay
+// inside the mathematical instrument. Elsewhere, wheel pans the paper scroll.
+// SVGs remain sovereign even if part of their drawing extends into the trim.
+// The 8.5% inset is the same as --math-window-trim in the desktop CSS below.
 const desktopScrollWheel=window.matchMedia('(min-width:861px) and (hover:hover) and (pointer:fine)');
+const desktopMathWindowTrim=.085;
+function pointerOverMathWindow(x,y){
+  for(const board of storyTrack.querySelectorAll('.story-panel .space')){
+    const r=board.getBoundingClientRect();
+    const pad=r.height*desktopMathWindowTrim;
+    if(x>=r.left && x<=r.right && y>=r.top+pad && y<=r.bottom-pad) return true;
+  }
+  return false;
+}
 sheet.addEventListener('wheel',e=>{
   if(!desktopScrollWheel.matches||e.ctrlKey||e.metaKey||e.altKey||backgroundDrag)return;
-  const horizontal=Math.abs(e.deltaX)>Math.abs(e.deltaY)*.7 && Math.abs(e.deltaX)>0;
-  // Wheel zoom is intentionally local to the active mathematical controls.
-  // On the unmarked portions of an SVG the same wheel can turn the scroll.
-  if(!horizontal){
-    const instrument=e.target.closest('svg.instrument');
-    if(instrument){
-      const id=instrument.id;
-      if(['annulusPre','annulusAmbient','intervalDiagram','quotCircle'].includes(id))return;
-      if(id==='prodSquareAtlas' && e.target.closest('[data-product-role], [data-wheel-axis]'))return;
-      if(id==='prodTorusAtlas' && e.target.closest('[data-product-role]'))return;
-      if(id==='prodTorusFactors' && e.target.closest('[data-factor-role]'))return;
-    }
-  }
+  if(e.target.closest('svg.instrument'))return; // all diagram-local wheel handlers win
+  if(pointerOverMathWindow(e.clientX,e.clientY))return;
   if(e.target.closest('button, a, input, textarea, select, .stamp-dies, .art-ink'))return;
-  const raw=horizontal?e.deltaX:e.deltaY;
+  const raw=Math.abs(e.deltaX)>Math.abs(e.deltaY)*.7 && Math.abs(e.deltaX)>0 ? e.deltaX : e.deltaY;
   const pixels=raw*(e.deltaMode===1?17:e.deltaMode===2?window.innerWidth*.8:1);
   if(!Number.isFinite(pixels)||Math.abs(pixels)<.01)return;
   e.preventDefault();
-  e.stopPropagation(); // horizontal trackpad gestures never resize open sets
+  e.stopPropagation();
   stopAnimation();
   scrollOffsetPx+=clamp(pixels*1.25,-380,380);
   setScrollOffset(true);
@@ -1157,7 +1179,12 @@ $('nextDiamond').addEventListener('click',()=>flip(1));
 sheet.addEventListener('pointerdown',e=>{
   if(window.matchMedia('(max-width:860px), (orientation:landscape) and (max-height:520px) and (pointer:coarse)').matches)return;
   if(e.pointerType==='mouse'&&e.button!==0)return;
-  if(e.target.closest('.space, svg.instrument, button, a, .paper-open-set, .specimen, .berry-rail, .shape-picker'))return;
+  if(e.target.closest('svg.instrument, button, a, .paper-open-set, .specimen, .berry-rail, .shape-picker'))return;
+  // Drag and wheel share the same shortened colour-window boundary on desktop.
+  // The newly revealed beige margins are part of the paper scroll, not the math.
+  if(desktopScrollWheel.matches){
+    if(pointerOverMathWindow(e.clientX,e.clientY))return;
+  }else if(e.target.closest('.space'))return;
   stopAnimation();
   backgroundDrag={id:e.pointerId,x:e.clientX,start:scrollOffsetPx,mobile:window.matchMedia('(max-width:860px), (orientation:landscape) and (max-height:520px) and (pointer:coarse)').matches};
   storyTrack.style.transition='none';
@@ -1487,7 +1514,11 @@ quot.addEventListener('pointerup',endArcDrag); quot.addEventListener('pointercan
 for(const svg of [quot,$('intervalDiagram')]) svg.addEventListener('wheel',e=>{e.preventDefault(); half=clamp(half*wheelRatio(e),.19,PI-.18); renderQuotient();},{passive:false});
 
 // Story I: the original subspace demonstration becomes an optional stamp studio.
-const annBlob={kind:'amoeba',x:314,y:146,r:82,sx:1.16,sy:.98,rotation:0,p1:1.0,p2:-.3,p3:.6};
+// On desktop the original 82-unit neighbourhood nearly kissed the outer annulus.
+// A smaller first impression crosses the inner rim cleanly and leaves breathing room.
+// Phone starts exactly as before.
+const annulusDefaultRadius=window.matchMedia('(min-width:861px) and (pointer:fine)').matches?70:82;
+const annBlob={kind:'amoeba',x:314,y:146,r:annulusDefaultRadius,sx:1.16,sy:.98,rotation:0,p1:1.0,p2:-.3,p3:.6};
 let subClayMode=false;
 function interactionShape(b){
   return b===annBlob && !subClayMode
@@ -1979,7 +2010,7 @@ function rackRefresh(){
 // its current experiment and its colourful paper specimens.
 function resetGadgetsForNewStory(){
   center=0; half=.89; arcDrag=null;
-  Object.assign(annBlob,{kind:'amoeba',x:314,y:146,r:82,sx:1.16,sy:.98,rotation:0,p1:1.0,p2:-.3,p3:.6});
+  Object.assign(annBlob,{kind:'amoeba',x:314,y:146,r:annulusDefaultRadius,sx:1.16,sy:.98,rotation:0,p1:1.0,p2:-.3,p3:.6});
   annulusOutline='';
   Object.assign(productModels.Square,{s:.49,t:.58,rs:.22,rt:.22});
   Object.assign(productModels.Torus,{s:0,t:0,rs:.16,rt:.20});
@@ -2023,7 +2054,7 @@ function controlsRefresh(){
   document.body.classList.toggle('assembly',productActive&&unionMode);
   const blob=pageForShape[page],hasShape=!!blob;
   $('shapePicker').classList.toggle('visible',hasShape&&subClayMode);
-  document.body.classList.toggle('subspace-clay',first&&subClayMode);
+  document.body.classList.toggle('subspace-clay',subClayMode);
   refreshArtMode();
   $('unionBerry').style.opacity=collectible?'1':'.55';
   const cannotKeep=(productActive&&unionMode)||(first&&!subClayMode);
