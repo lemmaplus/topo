@@ -830,6 +830,36 @@ body:not(.subspace-clay) #annulusAmbientMemories{display:none!important}
   .story-panel[data-story="3"] .space:first-child{--math-window-bg:#5d4350}
   .story-panel[data-story="3"] .space:last-child{--math-window-bg:#734f46}
 }
+
+/* Pilemma mobile diamonds · quiet, tucked below the story frame.
+   The solid right diamond takes the foreground; neither diamond shifts on tap.
+   Scope to handheld layouts only, leaving desktop scroll untouched. */
+@media (max-width:860px), (orientation:landscape) and (max-height:520px) and (pointer:coarse){
+  .page-diamonds{
+    left:15px;
+    bottom:calc(2px + env(safe-area-inset-bottom));
+    height:34px;
+    filter:drop-shadow(0 1px 1px rgba(74,55,48,.08));
+  }
+  .page-diamond{
+    width:32px;height:32px;
+    flex:0 0 32px;
+    transition:none!important;
+    transform:none!important;
+    -webkit-transform:none!important;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .page-diamond.previous{z-index:1}
+  .page-diamond.following{z-index:3;margin-left:-14px}
+  .page-diamond.previous .diamond-inside{inset:3px}
+  .page-diamond:is(:hover,:active,:focus,:focus-visible){
+    transform:none!important;
+    -webkit-transform:none!important;
+    filter:none;
+  }
+  .page-diamond:focus-visible{outline:1.5px solid #6e564d;outline-offset:3px}
+}
+
 </style>
 </head>
 <body>
