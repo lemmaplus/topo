@@ -1,0 +1,2277 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f7f5ee">
+<title>◯</title>
+<style>
+:root{
+  --wall:#f7f5ee;
+  --ink:#171717;
+  --paper:#fffdfa;
+  --warm:#c4b58a;
+  --ginger:#b78632;
+  --clay:#ac7936;
+  --clay-deep:#93602e;
+  --clay-ink:#9a6732;
+  --peach:#f5b7bd;
+  --peach-strong:#f19eaf;
+  --celadon:#cee5bf;
+  --butter:#f7e2ac;
+  --ginger-deep:#9d6f23;
+  --lav:#7f90c3;
+  --lav-soft:#c7d0f3;
+  --sand:#d8c08a;
+  --sand-soft:#e6d7ad;
+  --pink-soft:#efd0d7;
+  --cherry:#d7728a;
+  --blue-fill:#c7d0f3;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--wall)}
+body{-webkit-font-smoothing:antialiased;color:var(--ink)}
+.sheet{min-height:100svh;display:flex;align-items:center;justify-content:center;padding:44px clamp(22px,6vw,90px) 112px}
+.exhibit{width:100%;max-width:1200px}
+.exhibit[hidden]{display:none!important}
+.spaces{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:center;gap:clamp(28px,5vw,92px)}
+.products{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-items:center;gap:clamp(20px,3vw,44px)}
+.space,.product-cell{min-width:0;display:flex;justify-content:center;align-items:center}
+svg.instrument{display:block;width:100%;height:auto;aspect-ratio:480/385;overflow:visible;user-select:none;-webkit-user-select:none;touch-action:none}
+svg.instrument.interval-instrument{aspect-ratio:480/385}
+svg.product-svg{display:block;width:100%;height:auto;aspect-ratio:300/260;overflow:visible}
+.basecircle{fill:none;stroke:var(--clay-ink);stroke-width:5.2;stroke-linecap:round}
+.base-line{fill:none;stroke:var(--clay-ink);stroke-width:5.2;stroke-linecap:round}
+#subspaceExhibit .basecircle{stroke:var(--clay-deep);stroke-width:5.8}
+#quotientExhibit .basecircle,#quotientExhibit .base-line{stroke:var(--ink);stroke-width:5.6}
+#prodTorusFactors .factor-circle{stroke:var(--clay);stroke-width:5.4}
+.base-line{fill:none;stroke:var(--clay-ink);stroke-width:5.2;stroke-linecap:round}
+.segment{fill:none;stroke:#b6a57f;stroke-width:10.5;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+#quotSelected{stroke:#c4b58a;stroke-width:11.2}
+#subPreSelected,#subTargetSelected{stroke:#baa474;stroke-width:11.2}
+.open-blob-sand{fill:#d7deea;fill-opacity:.66;stroke:none;pointer-events:none}
+.open-blob-pink{fill:#e6dcc5;fill-opacity:.84;stroke:none;pointer-events:none}
+.open-blob-lav{fill:#dfe4ef;fill-opacity:.76;stroke:none;pointer-events:none}
+.hit-disk{fill:transparent;stroke:none}
+.seam-point{fill:var(--clay-deep);stroke:var(--wall);stroke-width:4.5;paint-order:stroke fill;pointer-events:none}
+.open-end{fill:var(--wall);stroke:var(--peach-strong);stroke-width:2.7;pointer-events:none}
+.annulus-body{fill:var(--clay);stroke:none;pointer-events:none}
+.annulus-intersection-blue{fill:#cfd6e6;fill-opacity:.96;stroke:none;pointer-events:none}
+.annulus-intersection-pink{fill:#cfbf97;fill-opacity:.96;stroke:none;pointer-events:none}
+/* Product page */
+.product-body{fill:var(--ginger);stroke:none}
+.product-open{fill:var(--lav-soft);stroke:none}
+.product-open-2{fill:var(--pink-soft);stroke:none}
+.product-outline{fill:none;stroke:rgba(0,0,0,.10);stroke-width:1.2}
+/* A pair of raspberry-like pagination berries, away from the artwork. */
+.page-berries{position:fixed;left:clamp(14px,2.8vw,38px);bottom:calc(clamp(13px,2.6vh,27px) + env(safe-area-inset-bottom));z-index:35;display:flex;align-items:center;isolation:isolate}
+.page-berry{appearance:none;width:39px;height:39px;border-radius:52% 48% 51% 49%;padding:0;display:grid;place-items:center;cursor:pointer;touch-action:manipulation;transition:transform .18s ease,background .18s ease}
+.page-berry.previous{background:#b78632;border:2px solid #b78632;color:#fff4d9;z-index:2}
+.page-berry.following{background:var(--wall);border:2.5px solid #b78632;color:#9d6f23;margin-left:-5px;z-index:1}
+.page-berry svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2.3;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+.page-berry:hover{transform:translateY(-2px)}
+.page-berry:focus-visible{outline:2px solid #7c90ba;outline-offset:4px}
+
+/* Only the two product-topology pages gain the space once taken by the pager. */
+body.product-focus .sheet{padding:clamp(12px,2.2vh,28px) clamp(12px,2.6vw,42px) clamp(45px,5.8vh,65px)}
+body.product-focus #prodSquareExhibit,body.product-focus #prodTorusExhibit{max-width:1600px}
+body.product-focus #prodSquareExhibit .spaces,body.product-focus #prodTorusExhibit .torus-pair{gap:clamp(12px,2.8vw,52px)}
+body.product-focus #prodTorusFactors{width:100%;transform:translateY(12px)}
+
+@media (max-width:860px){
+  .sheet{padding:18px 23px 101px}
+  .spaces,.products,.torus-pair{grid-template-columns:1fr;gap:clamp(8px,2vh,24px)}
+  svg.instrument{width:min(100%,390px);max-height:39svh}
+  svg.instrument.interval-instrument{max-height:39svh;overflow:visible}
+  svg.product-svg{width:min(100%,330px);max-height:31svh}
+  .page-berry{width:35px;height:35px}
+  body.product-focus .sheet{padding:12px clamp(8px,2.5vw,20px) calc(45px + env(safe-area-inset-bottom))}
+  body.product-focus #prodSquareExhibit .spaces,body.product-focus #prodTorusExhibit .torus-pair{gap:clamp(4px,1.2vh,13px)}
+  body.product-focus #prodSquareExhibit svg.instrument,body.product-focus #prodTorusExhibit svg.instrument{width:min(100%,480px);max-height:44svh}
+  body.product-focus #prodTorusFactors{width:min(100%,480px);transform:none}
+}
+@media (prefers-reduced-motion:reduce){.exhibit{animation:none}.page-berry{transition:none}}
+
+/* Product topology: projection pullbacks in lavender/pink, their meet in warm gold. */
+.product-strip-u{fill:#bac9e8;fill-opacity:.50;pointer-events:none}
+.product-strip-v{fill:#d9d9b3;fill-opacity:.46;pointer-events:none}
+.product-rectangle{fill:#b58a3c;fill-opacity:.95;pointer-events:none}
+.product-factor-u{stroke:#8296c1;stroke-width:10;stroke-linecap:round;fill:none;pointer-events:none}
+.product-factor-v{stroke:#b8b57c;stroke-width:10;stroke-linecap:round;fill:none;pointer-events:none}
+.product-geometry{fill:#b88637;stroke:none}
+.product-highlight{fill:#d9dfef;stroke:none}
+.product-boundary{fill:none;stroke:#986f35;stroke-width:2.5;pointer-events:none}
+.torus-pair{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:center;gap:clamp(26px,4vw,46px)}
+.factor-circle{fill:none;stroke:var(--ginger);stroke-width:5.1;stroke-linecap:round}
+.factor-arc-u{fill:none;stroke:#8296c1;stroke-width:12.5;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+.factor-arc-v{fill:none;stroke:#b8b57c;stroke-width:12.5;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+.factor-dot{fill:var(--warm);stroke:var(--wall);stroke-width:3.6;paint-order:stroke fill;pointer-events:none}
+.factor-hit{fill:transparent;stroke:none}
+#intervalHighlights path{stroke:#8b9bc8;stroke-width:10.8;stroke-linecap:round;fill:none;pointer-events:none}
+#intervalZero,#intervalOne,#quotCircle .seam-point{fill:var(--warm);stroke:var(--wall);stroke-width:4.5}
+#annulusPre .annulus-body,#annulusAmbient .annulus-body{fill:var(--clay)}
+.factor-handle-open{fill:var(--wall);stroke:var(--warm);stroke-width:3.2;pointer-events:none}
+.factor-handle-solid{fill:var(--warm);stroke:var(--wall);stroke-width:3.2;paint-order:stroke fill;pointer-events:none}
+.factor-handle-hit{fill:transparent;stroke:none;cursor:grab}
+
+.torus-contour{fill:none;stroke:var(--ink);stroke-width:3.6;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+.torus-contour-soft{fill:none;stroke:rgba(23,23,23,.46);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+.torus-seam{fill:none;stroke:rgba(23,23,23,.78);stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+.torus-sketched{fill:none;stroke:rgba(23,23,23,.92);stroke-width:2.8;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+.torus-sketched-soft{fill:none;stroke:rgba(23,23,23,.56);stroke-width:2.1;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+.glued-edge-x,.glued-edge-y{fill:none;stroke-width:4.2;stroke-linecap:round;pointer-events:none;opacity:.58}
+.glued-edge-x{stroke:#8f7b56}.glued-edge-y{stroke:#b8b57c}
+
+
+/* Two ginger berries: one keeps a basis element, the other assembles unions. */
+.berry-rail{position:fixed;z-index:25;top:clamp(18px,4.3vh,42px);right:clamp(21px,4.7vw,75px);display:flex;align-items:center;gap:16px;pointer-events:none}
+.berries{display:flex;align-items:center;isolation:isolate;pointer-events:auto}
+.berry{width:43px;height:43px;cursor:pointer;padding:0;display:grid;place-items:center;border-radius:50%;appearance:none;transition:transform .2s ease,filter .2s ease,border-color .2s ease}
+.berry:hover{transform:none}
+.berry:focus-visible,.shape-pick:focus-visible,.specimen:focus-visible{outline:2px solid #7c90ba;outline-offset:4px}
+#keepBerry{background:#b78632;border:2.5px solid #b78632;z-index:2}
+#unionBerry{background:var(--wall);border:3px solid #b78632;margin-left:-11px;z-index:1}
+.berry.select{filter:none}
+#keepBerry.select{box-shadow:none}
+#unionBerry.select{box-shadow:none;background:#f3dfad}
+/* Subspace shape selection is independent of product union control. */
+.shape-picker{display:none;position:fixed;z-index:25;top:clamp(18px,4.3vh,42px);right:clamp(21px,4.7vw,75px);align-items:center;gap:4px;pointer-events:auto}
+.shape-picker.visible{display:flex}
+.shape-pick{display:grid;place-items:center;border:0;background:none;padding:4px;width:37px;height:37px;cursor:pointer;opacity:.45;border-radius:50%;transition:opacity .2s,transform .2s}
+.shape-pick.active{opacity:1;transform:scale(1.14)}
+.shape-pick svg{width:30px;height:30px;overflow:visible}
+.berry-rail[hidden]{display:none}
+.specimen-rack{position:fixed;z-index:20;bottom:112px;left:50%;transform:translateX(-50%);width:min(76vw,730px);min-height:54px;display:flex;gap:9px;align-items:center;justify-content:center;flex-wrap:wrap;pointer-events:none}
+.specimen-rack:empty{display:none}
+.specimen{pointer-events:auto;appearance:none;cursor:grab;position:relative;border:0;padding:2px;background:transparent;display:grid;place-items:center;width:49px;height:49px;flex:0 0 49px;touch-action:none;transition:transform .2s,filter .2s;animation:none}
+.specimen svg{width:45px;height:45px;overflow:visible;pointer-events:none}
+.specimen::after{content:none}
+.specimen:hover{transform:none}
+.specimen:active{cursor:grabbing}
+.specimen-drag{position:fixed;z-index:80;width:52px;height:52px;pointer-events:none;opacity:.82;filter:drop-shadow(0 7px 6px rgba(79,63,30,.13))}
+.specimen-drag svg{width:100%;height:100%}
+
+body.assembly #prodTorusStripsU,body.assembly #prodTorusStripsV,
+body.assembly #prodSquareStripsU,body.assembly #prodSquareStripsV,
+body.assembly #prodCylinderStripsU,body.assembly #prodCylinderStripsV{opacity:.25}
+body.assembly #prodTorusRectangles,body.assembly #prodSquareRectangles,body.assembly #prodCylinderRectangles{opacity:.17}
+body.assembly #subPreSelected,body.assembly #annulusPreIntersection{opacity:.12}
+.union-patch{fill:#9b9c73;opacity:.86;pointer-events:none}
+.union-arc{stroke:#d9e8b7;stroke-width:11.8;stroke-linecap:round;fill:none;pointer-events:none}
+.union-open{opacity:.94;stroke:none;pointer-events:none}
+#prodTorusUnion,#prodSquareUnion,#prodCylinderUnion{pointer-events:none}
+.union-glyph{display:none}
+@media(max-width:860px){.torus-pair{grid-template-columns:1fr;gap:10px}.torus-pair .instrument{width:min(100%,310px);max-height:32svh}.berry-rail,.shape-picker{top:12px;right:14px;gap:8px}.berry{width:35px;height:35px}.shape-pick{width:27px;height:30px;padding:2px}.shape-pick svg{width:24px;height:24px}.specimen-rack{bottom:106px;width:calc(100% - 22px);gap:4px;min-height:37px}.specimen{width:37px;height:37px;flex-basis:37px}.specimen svg{width:35px;height:35px}}
+#quotientExhibit .seam-point{fill:#526775;stroke:none}
+#prodTorusExhibit{--seam-x:#526775;--seam-y:#93602e}
+#prodTorusExhibit .glued-edge-x{stroke:var(--seam-x);opacity:1}
+#prodTorusExhibit .glued-edge-y{stroke:var(--seam-y);opacity:1}
+#prodTorusExhibit .factor-glue-x{fill:var(--seam-x);stroke:none}
+#prodTorusExhibit .factor-glue-y{fill:var(--seam-y);stroke:none}
+body.assembly #torusClayBase{fill:#ac7936;opacity:1}
+body.assembly #prodTorusStripsU,body.assembly #prodTorusStripsV,body.assembly #prodTorusRectangles{display:none}
+#specimenRack{position:fixed;inset:0;width:auto;height:auto;min-height:0;transform:none;display:block;pointer-events:none}
+.paper-open-set{position:absolute;padding:0;border:0;background:none;pointer-events:none;touch-action:none}
+.paper-open-set svg{display:block;overflow:visible;pointer-events:none}
+.paper-open-set rect{pointer-events:visiblePainted;cursor:grab;touch-action:none}
+.paper-open-set rect:active{cursor:grabbing}
+#prodTorusExhibit .instrument{aspect-ratio:380/320}
+@media(max-width:860px){#prodTorusExhibit .instrument{width:min(100%,390px);max-height:38svh}}
+
+/* Unified fired-clay studies: pages 2–4. Strokes are screen-space widths. */
+#quotientExhibit,#prodSquareExhibit,#prodTorusExhibit{--fired-clay:#c67942;--slip:#fff0d2;--charcoal:#292622;--seam-x:#292622;--seam-y:#813e2e}
+#quotientExhibit .base-line,#quotientExhibit .basecircle,#prodTorusFactors .factor-circle,.atelier-bar{stroke:var(--fired-clay);stroke-width:4;stroke-linecap:butt;vector-effect:non-scaling-stroke}
+.atelier-boundary,#prodTorusExhibit .glued-edge-x,#prodTorusExhibit .glued-edge-y{stroke-width:4;stroke-linecap:butt;stroke-linejoin:miter;vector-effect:non-scaling-stroke;opacity:1}
+.atelier-boundary{stroke:var(--charcoal);fill:none}
+.atelier-base,body.assembly #torusClayBase{fill:var(--fired-clay);opacity:1}
+#quotSelected,#intervalHighlights line,#prodSquareFactorU line,#prodSquareFactorV line,#prodTorusFactorU line,#prodTorusFactorV line,#prodTorusFactors .factor-arc-u,#prodTorusFactors .factor-arc-v{stroke:var(--slip);stroke-width:8;stroke-linecap:butt;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+#quotientExhibit .seam-point{fill:var(--charcoal);stroke:none}
+
+@media(min-width:861px){
+  #prodTorusFactors{width:88%;transform:translateY(28px)}
+}
+.placed-paper,.placed-paper rect{pointer-events:visiblePainted;cursor:grab;touch-action:none}
+/* First sheet / Greek pottery: the saffron cut U ∩ A is upstairs only;
+   the complete Aegean-green ambient open U stays downstairs. */
+#annulusExhibit{--stamp-bg:#FBF7F0;--stamp-sand:#E8DED0;--stamp-dust:#D9CABA;--stamp-sage:#BFC3AF;--stamp-adobe:#C98E78;--stamp-clay:#A96F5A;--stamp-coral:#D49A86;--stamp-mauve:#B89A93;--stamp-turq:#7E9F9A}
+#annulusExhibit .annulus-body{fill:var(--stamp-dust)}
+#annulusExhibit .open-blob-pink{fill:#6F554B;fill-opacity:.94}
+#annulusExhibit .annulus-intersection-blue,
+#annulusExhibit .annulus-intersection-pink{fill:#EFE4D6;fill-opacity:1}
+#annulusExhibit .saved-stamp-ambient{mix-blend-mode:multiply;fill-opacity:.24}
+#annulusExhibit .saved-stamp-cut{mix-blend-mode:multiply;fill-opacity:.9}
+
+#prodSquareExhibit{--utah-board:#A77967;--utah-h:#D79B7D;--utah-h-soft:#EFCBB9;--utah-v:#B7A7C9;--utah-v-soft:#DDD0E7;--utah-rect:#F7EAD8}
+#prodSquareExhibit .atelier-base{fill:var(--utah-board)!important}
+#prodSquareExhibit .atelier-bar{stroke:var(--utah-board)!important}
+
+/* The atlas catch-all drag rectangle must NEVER sit above an already placed
+   basic open. Its canvas still receives pointer events via the painted square. */
+#prodSquareDragArea,#prodTorusDragArea{pointer-events:none}
+/* Each rect of a saved open stays pickable (including seam-wrapped pieces). */
+#prodSquareUnion .placed-paper rect,#prodTorusUnion .placed-paper rect{
+  pointer-events:visiblePainted;cursor:grab;touch-action:none;
+}
+#prodSquareUnion .placed-paper rect:active,#prodTorusUnion .placed-paper rect:active{cursor:grabbing}
+/* Union is a secondary view: it never obscures the current basis, or
+   overrides pointer events. Saved pieces remain individually pickable. */
+body.assembly #prodSquareUnion,body.assembly #prodTorusUnion{filter:saturate(1.12)}
+/* Distinct gluing pairs on the fourth page. */
+#prodTorusExhibit{--seam-x:#EC871B;--seam-y:#f2ce78}
+/* In the monochrome cut study, keep only the gluing cues in colour: 
+   papaya for one seam-pair, butter-gold for the other. */
+#prodTorusExhibit .glued-edge-x{stroke:var(--seam-x)!important}
+#prodTorusExhibit .glued-edge-y{stroke:var(--seam-y)!important}
+#prodTorusExhibit .factor-glue-x{fill:var(--seam-x)!important;stroke:none!important}
+#prodTorusExhibit .factor-glue-y{fill:var(--seam-y)!important;stroke:none!important}
+#prodTorusExhibit .torus-seam-x{stroke:var(--seam-x)!important}
+#prodTorusExhibit .torus-seam-y{stroke:var(--seam-y)!important}
+/* The hollow berry on the fourth page starts a real hand-assembly mode:
+   the live helper graphics withdraw, the two parallel guide bars vanish,
+   and the left square becomes a dark clay workbench for the saved pieces. */
+#prodTorusExhibit #torusClayBase{transition:fill .32s ease}
+body.assembly #prodTorusExhibit #torusClayBase{fill:var(--chosen-clay,#513943);opacity:1}
+body.assembly #prodTorusExhibit #prodTorusStripsU,
+body.assembly #prodTorusExhibit #prodTorusStripsV,
+body.assembly #prodTorusExhibit #prodTorusRectangles,
+body.assembly #prodTorusExhibit #prodTorusFactorU,
+body.assembly #prodTorusExhibit #prodTorusFactorV,
+body.assembly #prodTorusExhibit .atelier-bar,
+body.assembly #prodTorusExhibit #torusFactorArcsU,
+body.assembly #prodTorusExhibit #torusFactorArcsV,
+body.assembly #prodTorusExhibit #torusFactorHandlesU,
+body.assembly #prodTorusExhibit #torusFactorHandlesV{display:none}
+@media(prefers-reduced-motion:reduce){#prodTorusExhibit #torusClayBase{transition:none}}
+
+/* Basis/clay mode distinctions for the product pages. */
+#keepBerry[aria-disabled="true"]{opacity:.32!important;pointer-events:none;filter:saturate(.2)}
+.memory-trace{fill:none;stroke:#fff0d2;stroke-opacity:.16;stroke-width:3;vector-effect:non-scaling-stroke;pointer-events:none}
+.memory-trace.soft{stroke-opacity:.09}
+.helper-faint{opacity:.22}
+
+/* Final viewport-specific sizing for the two mathematical instruments only. */
+@media(max-width:860px){
+  body.product-focus #prodTorusExhibit .instrument,body.product-focus #prodTorusExhibit #prodTorusFactors,
+  body.product-focus #prodSquareExhibit .instrument{width:min(100%,480px);max-height:44svh}
+  body.product-focus #prodTorusFactors{transform:none}
+}
+@media(min-width:861px){body.product-focus #prodTorusFactors{width:100%;transform:translateY(12px)}}
+
+/* Emakimono: four real mathematical stories mounted side by side.
+   Geometry/pointer coordinates remain native SVG units. */
+html,body{overflow-x:hidden}
+.sheet{width:100%;height:100svh;min-height:0;overflow:hidden;display:flex;align-items:flex-start;justify-content:flex-start;padding:clamp(12px,2vh,24px) 0 0!important}
+.story-track{display:flex;align-items:flex-start;gap:clamp(12px,1.2vw,18px);width:max-content;height:100%;padding:clamp(8px,1.5vh,18px) clamp(12px,1.8vw,24px) 0;transform:translate3d(0,0,0);transition:transform 430ms cubic-bezier(.24,.68,.34,1);will-change:transform;backface-visibility:hidden}
+.story-panel{position:relative;flex:0 0 min(88vw,1280px);width:min(88vw,1280px);min-height:clamp(610px,82svh,860px);height:auto;display:flex;flex-direction:column;justify-content:center;background:#d7c6b8;border-radius:2px;padding:clamp(16px,1.8vw,24px) clamp(16px,1.9vw,26px) 12px;box-shadow:none;overflow:visible;scrollbar-width:none}
+.story-panel::-webkit-scrollbar{display:none}
+.story-panel .exhibit{width:100%;max-width:none}
+.story-panel .spaces,.story-panel .torus-pair{position:relative;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:stretch;gap:clamp(16px,1.7vw,28px);padding-bottom:12px;flex:1 1 auto}
+.story-panel .space{min-width:0;display:flex;align-items:center;justify-content:center;padding:clamp(10px,1.15vw,14px);min-height:clamp(260px,34vw,455px)}
+.story-panel[data-story="0"] .space:first-child{background:#8f5e53}.story-panel[data-story="0"] .space:last-child{background:#e8d8b5}
+.story-panel[data-story="1"] .space:first-child{background:#a46f59}.story-panel[data-story="1"] .space:last-child{background:#eadbb8}
+.story-panel[data-story="2"] .space:first-child{background:#88554c}.story-panel[data-story="2"] .space:last-child{background:#9a654e}
+.story-panel[data-story="3"] .space:first-child{background:#5d4350}.story-panel[data-story="3"] .space:last-child{background:#734f46}
+.story-panel svg.instrument{width:100%;height:auto;max-height:min(56svh,520px)}
+.story-panel #annulusExhibit svg.instrument{aspect-ratio:390 / 350}
+.story-panel #prodSquareExhibit svg.instrument{aspect-ratio:376 / 350}
+.story-panel #prodTorusAtlas{aspect-ratio:372 / 320}
+.story-panel #prodTorusFactors{aspect-ratio:370 / 320;width:100%;transform:none}
+.story-panel .spaces::after,.story-panel .torus-pair::after{content:"";position:absolute;left:50%;top:10px;bottom:18px;width:1.5px;transform:translateX(-50%);background:#f9f0de;opacity:.95;pointer-events:none;z-index:1}
+.story-meta{display:grid;grid-template-columns:1fr 1fr;align-items:end;gap:12px;margin-top:8px;color:#6f5145;font-size:clamp(20px,1.8vw,32px);line-height:1.1}
+.story-meta .story-up,.story-meta .story-down{text-align:center}
+.story-meta .story-roman{display:none}
+.page-berries{display:none!important}
+.page-diamonds{position:fixed;left:clamp(17px,2.7vw,37px);bottom:calc(clamp(17px,2.8vh,30px) + env(safe-area-inset-bottom));height:46px;display:flex;align-items:center;isolation:isolate;z-index:35}
+.page-diamond{appearance:none;flex:none;width:42px;height:42px;display:block;position:relative;padding:0;border:0;cursor:pointer;touch-action:manipulation;clip-path:polygon(50% 0%,100% 50%,50% 100%,0% 50%);transition:filter .16s ease,background .16s ease;outline:none}
+.page-diamond.previous{background:#87554b;z-index:2}
+.page-diamond.following{background:#87554b;margin-left:-19px;z-index:1}
+.page-diamond.previous .diamond-inside{position:absolute;inset:3px;clip-path:polygon(50% 0%,100% 50%,50% 100%,0% 50%);background:var(--wall)}
+.page-diamond.following .diamond-inside{display:none}
+.page-diamond:hover:not(:disabled){filter:brightness(1.23)}
+.page-diamond:focus-visible{filter:drop-shadow(0 0 3px #493138) brightness(1.35)}
+body.is-scroll-moving #specimenRack{opacity:0;pointer-events:none}
+body.is-scroll-moving .berry-rail,body.is-scroll-moving .shape-picker{pointer-events:none;opacity:.5}
+.story-track.is-moving .story-panel{pointer-events:none}
+@media(max-width:860px){
+  .sheet{align-items:flex-start;padding-top:clamp(42px,5vh,58px)!important}
+  .story-track{gap:12px;padding:0 8px}
+  .story-panel{flex-basis:min(92vw,560px);width:min(92vw,560px);min-height:70svh;padding:14px 14px 10px}
+  .story-panel .spaces,.story-panel .torus-pair{grid-template-columns:minmax(0,1fr);gap:10px;flex:1 1 auto}
+  .story-panel .space{min-height:clamp(205px,28vh,290px);padding:9px}
+  .story-panel svg.instrument{width:min(100%,520px);max-height:38svh}
+  .story-panel .spaces::after,.story-panel .torus-pair::after{left:10px;right:10px;top:50%;bottom:auto;width:auto;height:1px;transform:translateY(-50%);opacity:.7}
+  .story-panel #prodTorusFactors{width:min(100%,520px);max-height:38svh;transform:none}
+  .story-meta{font-size:clamp(16px,4.8vw,24px)}
+  .story-meta .story-roman{display:none}
+  .page-diamonds{left:15px;bottom:calc(12px + env(safe-area-inset-bottom))}
+  .page-diamond{width:38px;height:38px}
+  .page-diamond.following{margin-left:-17px}
+}
+@media(prefers-reduced-motion:reduce){
+  .story-track{transition:none!important;will-change:auto}
+  .page-diamond{transition:none}
+}
+
+
+/* Balanced mounting boards, vertically centered with equal top/bottom breathing room. */
+.sheet{align-items:center!important;justify-content:flex-start!important;padding:0!important;touch-action:pan-y;cursor:grab}
+.sheet.is-hand-dragging{cursor:grabbing}
+.story-track{align-items:center!important;gap:clamp(40px,12vw,190px);padding:0 clamp(16px,2vw,28px)!important;user-select:none;-webkit-user-select:none}
+.story-panel{height:min(84svh,900px);min-height:0;max-height:calc(100svh - 90px);padding:clamp(16px,1.8vw,24px) clamp(16px,1.9vw,26px);flex-shrink:0;justify-content:center}
+.story-panel .exhibit{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;justify-content:center}
+.story-panel .spaces,.story-panel .torus-pair{flex:1 1 auto;min-height:0;padding-bottom:0}
+.story-panel .space{min-height:0}
+.story-panel .spaces::after,.story-panel .torus-pair::after{top:10px;bottom:10px;background:#fff6e7;opacity:.97}
+.story-panel .space,.story-panel .space svg{cursor:initial}
+/* The scroll is draggable in the margins and on the beige mounting board,
+   but the colored mathematical windows retain all their pointer gestures. */
+@media(max-width:860px){
+  .sheet{align-items:center!important;padding:0!important}
+  .story-track{gap:12vw;padding:0 8px!important}
+  .story-panel{height:calc(100svh - 110px);min-height:0;max-height:calc(100svh - 80px);padding:14px}
+  .story-panel .spaces,.story-panel .torus-pair{gap:10px;flex:1 1 auto}
+  .story-panel .space{min-height:0;padding:8px}
+  .story-panel svg.instrument{max-height:38svh}
+  .story-panel .spaces::after,.story-panel .torus-pair::after{left:10px;right:10px;top:50%;bottom:auto;width:auto;height:1.5px;background:#fff6e7}
+}
+
+/* Story I: the ambient open U can extend mathematically beyond the display,
+   but its paint and pointer hit area are clipped by the beige window. */
+.story-panel[data-story="0"] .spaces > .space:last-child{overflow:hidden}
+
+/* Keep the moving, clipped paper in its own paint boundary.
+   The SVG clip path above remains authoritative for the open U geometry. */
+.story-panel[data-story="0"] .spaces > .space:last-child{
+  overflow:hidden;
+  isolation:isolate;
+  contain:paint;
+}
+
+/* Fourth story monochrome CUT mode.  Crucial: never apply grayscale to the
+   entire SVG — that also desaturates the separately coloured gluing cues.
+   Desaturate only the selected mathematical shapes and guides, leaving
+   the two seam pairs and corresponding dots in their original colours. */
+body:not(.assembly) .story-panel[data-story="3"] #prodTorusExhibit svg.instrument{
+  filter:none;
+}
+body:not(.assembly) #prodTorusExhibit #torusClayBase{
+  fill:#B7ACB9 !important;
+  opacity:1;
+}
+body:not(.assembly) #prodTorusExhibit .atelier-bar,
+body:not(.assembly) #prodTorusExhibit .factor-circle{
+  stroke:#7D7383 !important;
+}
+body:not(.assembly) #prodTorusExhibit #prodTorusStripsU,
+body:not(.assembly) #prodTorusExhibit #prodTorusStripsV,
+body:not(.assembly) #prodTorusExhibit #prodTorusRectangles,
+body:not(.assembly) #prodTorusExhibit #prodTorusUnion,
+body:not(.assembly) #prodTorusExhibit #prodTorusFactorU,
+body:not(.assembly) #prodTorusExhibit #prodTorusFactorV,
+body:not(.assembly) #prodTorusExhibit #torusFactorArcsU,
+body:not(.assembly) #prodTorusExhibit #torusFactorArcsV,
+body:not(.assembly) #prodTorusExhibit #torusFactorHandlesU,
+body:not(.assembly) #prodTorusExhibit #torusFactorHandlesV{
+  filter:grayscale(1);
+}
+/* Refine the fourth cut study: lighten the two factor circles on the right,
+   and let the left square show only the open set itself (no full crossing strips). */
+body:not(.assembly) #prodTorusExhibit #prodTorusFactors .factor-circle{
+  stroke:#C5B8AE !important;
+}
+body:not(.assembly) #prodTorusExhibit #torusFactorArcsU,
+body:not(.assembly) #prodTorusExhibit #torusFactorArcsV,
+body:not(.assembly) #prodTorusExhibit #torusFactorHandlesU,
+body:not(.assembly) #prodTorusExhibit #torusFactorHandlesV{
+  filter:grayscale(1) brightness(1.18);
+}
+/* Only the auxiliary bars are grey: the four square gluing edges
+   retain the two paired colours defined above. */
+body:not(.assembly) #prodTorusExhibit #prodTorusAtlas .atelier-bar{
+  stroke:#5d5d5d !important;
+}
+body:not(.assembly) #prodTorusExhibit #prodTorusAtlas .glued-edge-x{
+  stroke:var(--seam-x) !important;
+}
+body:not(.assembly) #prodTorusExhibit #prodTorusAtlas .glued-edge-y{
+  stroke:var(--seam-y) !important;
+}
+body:not(.assembly) #prodTorusExhibit #prodTorusStripsU,
+body:not(.assembly) #prodTorusExhibit #prodTorusStripsV{
+  display:none;
+}
+
+/* FOURTH STORY: monochrome mathematics in BOTH Cut and Clay modes.
+   These styles apply only inside the torus instrument, NOT to the coloured
+   cut-out papers in #prodTorusUnion or the floating specimen rack. */
+#prodTorusExhibit{
+  --seam-x:#7E8794; /* Utah canyon dusk: slate shadow / vertical gluing pair and first factor point */
+  --seam-y:#D8B06A; /* Utah canyon dusk: sunset ochre / horizontal gluing pair and second factor point */
+}
+#prodTorusExhibit #prodTorusAtlas .glued-edge-x,
+#prodTorusExhibit #prodTorusAtlas .glued-edge-y{
+  stroke-width:4;
+}
+#prodTorusExhibit #prodTorusFactors .factor-circle{
+  stroke:#C5B8AE !important;
+}
+#prodTorusExhibit #torusFactorArcsU,
+#prodTorusExhibit #torusFactorArcsV,
+#prodTorusExhibit #torusFactorHandlesU,
+#prodTorusExhibit #torusFactorHandlesV{
+  filter:grayscale(1) brightness(1.18);
+}
+#prodTorusExhibit #prodTorusAtlas .atelier-bar{stroke:#8A7A82 !important}
+body:not(.assembly) #prodTorusExhibit #prodTorusAtlas #prodTorusRectangles rect{
+  fill:#FBF0EA;
+}
+body.assembly #prodTorusExhibit #torusClayBase{
+  fill:var(--chosen-clay,#7A6675) !important;
+  opacity:1;
+}
+/* Keep the saved ceramic-paper palette exactly as it was, even in Clay. */
+body.assembly #prodTorusExhibit #prodTorusUnion{filter:none}
+
+/* Fourth gadget: saved basis elements are glued to their original positions.
+   Cut is a monochrome recording surface with soft gray impressions;
+   Clay reveals every recorded basis in its original opaque pastel color. */
+#prodTorusExhibit #prodTorusMemories,
+#prodTorusExhibit #prodTorusUnion,
+#prodTorusExhibit #prodTorusUnion *{
+  pointer-events:none!important;
+}
+body:not(.assembly) #prodTorusExhibit #prodTorusUnion{
+  filter:none!important;
+}
+#prodTorusExhibit #prodTorusMemories rect{
+  pointer-events:none;
+  fill:#EADBCF;
+  fill-opacity:.20;
+  stroke:#F7EEE8;
+  stroke-opacity:.45;
+  stroke-width:3;
+  vector-effect:non-scaling-stroke;
+}
+body.assembly #prodTorusExhibit #prodTorusMemories{display:none}
+/* Fourth gadget refinement: remove the horizontal/vertical guide bars
+   (and their selected bar-segments) and make the four gluing boundaries thicker. */
+#prodTorusExhibit #prodTorusAtlas .atelier-bar,
+#prodTorusExhibit #prodTorusFactorU,
+#prodTorusExhibit #prodTorusFactorV{
+  display:none !important;
+}
+#prodTorusExhibit #prodTorusAtlas .glued-edge-x,
+#prodTorusExhibit #prodTorusAtlas .glued-edge-y{
+  stroke-width:6.8 !important;
+}
+body.assembly #prodTorusExhibit #prodTorusAtlas .glued-edge-x,
+body.assembly #prodTorusExhibit #prodTorusAtlas .glued-edge-y{
+  display:none !important;
+}
+.story-panel[data-story="3"] #prodTorusAtlas{
+  display:block;
+  margin:auto;
+}
+
+/* No torus paper, once cut, can be moved or peeled away. */
+
+/* Fourth instrument ONLY: spacious fundamental domain and a genuine vertical
+   pair of factor circles. Keep the circles' SVG radius at 79 units. */
+@media (min-width:861px){
+  .story-panel[data-story="3"] #prodTorusExhibit .torus-pair{
+    grid-template-columns:minmax(0,1.52fr) minmax(0,.82fr);
+    gap:clamp(16px,1.6vw,26px);
+  }
+  .story-panel[data-story="3"] #prodTorusExhibit .torus-pair::after{left:calc((100% - clamp(16px,1.6vw,26px)) * 1.52 / 2.34 + clamp(16px,1.6vw,26px) / 2);}
+  .story-panel[data-story="3"] #prodTorusExhibit .space:first-child{padding:12px 15px;}
+  .story-panel[data-story="3"] #prodTorusExhibit .space:last-child{padding:8px 10px;}
+  .story-panel[data-story="3"] #prodTorusAtlas{
+    width:100%;max-height:min(70svh,650px);aspect-ratio:372/320;
+  }
+  .story-panel[data-story="3"] #prodTorusFactors{
+    width:100%;max-height:min(69svh,630px);aspect-ratio:220/450;transform:none;
+  }
+}
+
+/* Stamp tools live beside, never on top of, the ceramic save berry. */
+.shape-picker{right:calc(clamp(21px,4.7vw,75px) + 88px);gap:2px;}
+.shape-pick{flex:0 0 34px;width:34px;height:36px;padding:3px;}
+.shape-pick svg{width:28px;height:28px;}
+@media(max-width:860px){
+  .shape-picker{top:12px;right:80px;gap:1px;max-width:calc(100vw - 110px);}
+  .shape-pick{flex:0 0 27px;width:27px;height:29px;padding:1px;}
+  .shape-pick svg{width:24px;height:24px;}
+}
+/* White gypsum walls and sun-faded sand, not an orange wash. */
+.story-panel[data-story="0"] .space:first-child{background:#E8DED0;}
+.story-panel[data-story="0"] .space:last-child{background:#F4EFE5;}
+/* Utah hoodoos and their lavender-blue afternoon shadows. */
+.story-panel[data-story="2"] .space:first-child{background:#C6ACAA;}
+.story-panel[data-story="2"] .space:last-child{background:#D3B8AC;}
+/* The two factor intervals must be strong and distinctly coloured;
+   the induced strips are their transparent, lighter shadows. */
+#prodSquareExhibit #prodSquareFactorU line:not([data-product-role]):not([data-wheel-axis]){
+  stroke:#D79B7D !important;stroke-opacity:1 !important;
+}
+#prodSquareExhibit #prodSquareFactorV line:not([data-product-role]):not([data-wheel-axis]){
+  stroke:#B7A7C9 !important;stroke-opacity:1 !important;
+}
+.shape-pick{opacity:.66}
+.shape-pick.active{opacity:1}
+.shape-pick svg path,.shape-pick svg ellipse{fill:#A96F5A}
+/* Saved stamp colours are not desaturated or hidden by the active preview. */
+#annulusExhibit #annulusPreMemories .saved-stamp-cut{fill-opacity:1;mix-blend-mode:normal;stroke:none;pointer-events:none}
+#annulusExhibit #annulusAmbientMemories .saved-stamp-ambient{fill-opacity:.14;pointer-events:none}
+/* The current U∩A is the uncommitted stamp held above the pottery.
+   It must remain vivid and fully opaque even over an earlier impression. */
+#annulusExhibit #annulusPreIntersection{
+  fill-opacity:1 !important;
+  opacity:1 !important;
+  mix-blend-mode:normal !important;
+  /* Ceramic stamps are flat colour, without a contrasting rim. */
+  stroke:none !important;
+  stroke-width:0 !important;
+  pointer-events:none;
+}
+
+
+/* Santa Fe pigment wells: a tiny optional colour picker, not a toolbar.
+   AUTO stays the default. The wells appear only when ART is selected. */
+#artModeSwitch{
+  appearance:none;border:0;border-left:1px solid #B5A99B;
+  padding:0 0 0 8px;margin:0 0 0 3px;background:transparent;
+  color:#887C71;font-family:inherit;font-size:10px;font-weight:600;line-height:1.3;letter-spacing:.12em;
+  flex:0 0 43px;min-width:43px;height:28px;cursor:pointer;
+}
+#artModeSwitch[aria-pressed="true"]{color:#775448}
+#artModeSwitch:focus-visible,.art-ink:focus-visible{outline:2px solid #7E9F9A;outline-offset:3px}
+#artInkTray{
+  position:absolute;right:0;top:44px;display:flex;align-items:center;
+  justify-content:flex-end;flex-wrap:nowrap;width:max-content;max-width:calc(100vw - 28px);
+  gap:5px;padding:7px 9px;background:#F4EDE3;white-space:nowrap;
+}
+#artInkTray[hidden]{display:none!important}
+.art-ink{
+  appearance:none;background:var(--ink);border:2px solid transparent;
+  box-shadow:0 0 0 1px #D7CAB9 inset;border-radius:50%;
+  padding:0;width:21px;height:21px;flex:0 0 21px;cursor:pointer;
+}
+.art-ink[aria-pressed="true"]{outline:1.5px solid #6D554B;outline-offset:3px}
+@media(max-width:860px){
+  #artModeSwitch{font-size:9px;margin-left:1px;padding-left:5px;flex-basis:35px;min-width:35px;height:25px}
+  #artInkTray{top:34px;right:-66px;gap:3px;padding:6px 7px;max-width:calc(100vw - 28px)}
+  .art-ink{width:17px;height:17px;flex-basis:17px}
+}
+
+/* First gadget: a small clay stamping disk, never the product berries. */
+.berry-rail.stamp-tool{
+  top:calc(clamp(18px,4.3vh,42px) + 8px);
+}
+.berry-rail.stamp-tool #keepBerry{
+  width:26px;
+  height:26px;
+  border:0;
+  border-radius:50%;
+  background:#A96F5A;
+  box-shadow:none;
+  transition:background-color .16s ease,transform .12s ease;
+}
+.berry-rail.stamp-tool #keepBerry:hover{background:#B87B65}
+.berry-rail.stamp-tool #keepBerry:active{transform:scale(.92)}
+#unionBerry[hidden]{display:none!important}
+@media(max-width:860px){
+  .berry-rail.stamp-tool{top:calc(12px + 4px)}
+  .berry-rail.stamp-tool #keepBerry{width:23px;height:23px}
+}
+
+/* Pottery die collection: horizontally swipable stamps, ART always visible. */
+.shape-picker{
+  width:min(555px,calc(100vw - 175px));
+  max-width:calc(100vw - 120px);
+  gap:5px;
+}
+.stamp-dies{
+  display:flex;align-items:center;flex:1 1 auto;min-width:0;
+  gap:2px;overflow-x:auto;overflow-y:hidden;
+  overscroll-behavior-x:contain;scrollbar-width:none;
+  touch-action:pan-x; padding:3px 2px 4px;
+  -webkit-overflow-scrolling:touch;
+}
+.stamp-dies::-webkit-scrollbar{display:none}
+.stamp-dies .shape-pick{flex:0 0 34px}
+.shape-pick svg ellipse,.shape-pick svg circle,.shape-pick svg g{fill:#A96F5A}
+/* Keep the original spiral-icon stroke; the existing global path-fill rule
+   is not applied to this stroke-only drawing. */
+.shape-pick[data-shape="spiral"] svg path{fill:none;stroke:#A96F5A}
+#artModeSwitch{flex-shrink:0}
+@media(max-width:860px){
+  .shape-picker{width:calc(100vw - 105px);max-width:calc(100vw - 105px);right:80px;gap:2px}
+  .stamp-dies{gap:1px;padding:2px 0 3px}
+  .stamp-dies .shape-pick{flex-basis:28px}
+}
+
+/* Pilemma running marks: on the white gallery wall, outside each mounted
+   card. Absolute positioning preserves the untouched card dimensions. */
+.story-panel > .pilemma-card-footer{
+  position:absolute;
+  top:calc(100% + clamp(17px,2.3vh,25px));
+  left:0;
+  width:100%;
+  display:flex;
+  align-items:baseline;
+  justify-content:center;
+  gap:clamp(10px,1.6vw,20px);
+  white-space:nowrap;
+  color:#756B64;
+  font-size:10px;
+  line-height:1.3;
+  font-weight:400;
+  letter-spacing:.04em;
+  pointer-events:auto;
+  user-select:none;
+  -webkit-user-select:none;
+}
+.pilemma-card-footer .pilemma-mark{
+  font-family:Georgia,'Times New Roman',serif;
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:.05em;
+  color:#635950;
+}
+.pilemma-card-footer a{
+  color:inherit;
+  text-decoration:none;
+}
+.pilemma-card-footer a:hover,
+.pilemma-card-footer a:focus-visible{text-decoration:underline;text-underline-offset:3px}
+@media(max-width:860px){
+  .story-panel > .pilemma-card-footer{
+    top:calc(100% + 15px);
+    font-size:9px;
+    gap:9px;
+  }
+  .pilemma-card-footer .pilemma-mark{font-size:11px}
+}
+
+/* Desktop: keep the ceramic stamp selector entirely above the card frame. */
+@media(min-width:861px){
+  .shape-picker{top:clamp(2px,0.7vh,9px)}
+}
+
+/* Final restrained control refinement.
+   The stamp selector and the save disk sit in the SAME top white gutter.
+   The colored mathematical panels, page framing and footer are untouched. */
+#keepBerry{
+  background:#A77A6B;
+  border-color:#A77A6B;
+}
+#unionBerry{
+  background:#F4EEE5;
+  border-color:#A77A6B;
+}
+#unionBerry.select{background:#DEC7BB}
+.berry-rail.stamp-tool #keepBerry{
+  background:#9C7569;
+  border:0;
+  box-shadow:none;
+}
+.berry-rail.stamp-tool #keepBerry:hover{background:#AC8375}
+@media(min-width:861px){
+  .berry-rail{
+    top:clamp(8px,1.25vh,14px);
+    right:clamp(13px,2.5vw,38px);
+  }
+  .berry{width:30px;height:30px}
+  #unionBerry{margin-left:-8px;border-width:2px}
+  /* Stamp save disk aligns vertically with the raised stamp row. */
+  .berry-rail.stamp-tool{
+    top:clamp(13px,1.8vh,19px);
+    right:clamp(13px,2.5vw,38px);
+  }
+  .berry-rail.stamp-tool #keepBerry{width:20px;height:20px}
+}
+@media(max-width:860px){
+  .berry-rail{
+    top:8px;
+    right:9px;
+  }
+  .berry{width:29px;height:29px}
+  #unionBerry{margin-left:-7px;border-width:2px}
+  .berry-rail.stamp-tool{top:12px;right:10px}
+  .berry-rail.stamp-tool #keepBerry{width:20px;height:20px}
+}
+</style>
+</head>
+<body>
+<main class="sheet" aria-label="Topology Observatory — horizontal mathematical picture scroll">
+<div class="story-track" id="storyTrack">
+<div class="story-panel" data-story="0" aria-label="Story 1 of 4">
+<section class="exhibit" id="annulusExhibit" aria-label="Annulus as a subspace" >
+    <div class="spaces">
+      <div class="space">
+        <svg class="instrument" id="annulusPre" viewBox="45 9 390 350" role="img" aria-label="Cut U intersect A highlighted on the upstairs annulus">
+          <defs>
+            <clipPath id="annulusClipPre" clipPathUnits="userSpaceOnUse">
+              <path d="M406 183 A166 166 0 1 0 74 183 A166 166 0 1 0 406 183 Z M328 183 A88 88 0 1 0 152 183 A88 88 0 1 0 328 183 Z" clip-rule="evenodd"></path>
+            </clipPath>
+          </defs>
+          <path class="annulus-body" d="M406 183 A166 166 0 1 0 74 183 A166 166 0 1 0 406 183 Z M328 183 A88 88 0 1 0 152 183 A88 88 0 1 0 328 183 Z" fill-rule="evenodd"></path>
+          <!-- Fired impressions lie beneath the current, uncommitted stamp. -->
+          <g id="annulusPreMemories" clip-path="url(#annulusClipPre)"></g>
+          <g id="annulusUnion" clip-path="url(#annulusClipPre)"></g>
+          <!-- Live U ∩ A preview must always paint last, above older impressions. -->
+          <g clip-path="url(#annulusClipPre)" pointer-events="none"><path id="annulusPreIntersection" class="annulus-intersection-blue"></path></g>
+        </svg>
+      </div>
+      <div class="space">
+        <svg class="instrument" id="annulusAmbient" viewBox="45 9 390 350" role="img" aria-label="Full ambient open set U in the plane, with the annulus behind it as reference">
+          <!-- Clip the dynamically translated open set in SVG coordinates too,
+               so its paint and interaction cannot leak past this window. -->
+          <defs><clipPath id="annulusAmbientWindow" clipPathUnits="userSpaceOnUse">
+            <rect x="45" y="9" width="390" height="350"/>
+          </clipPath></defs>
+          <!-- Downstairs: show U itself, not another copy of the cut U ∩ A. -->
+          <path class="annulus-body" d="M406 183 A166 166 0 1 0 74 183 A166 166 0 1 0 406 183 Z M328 183 A88 88 0 1 0 152 183 A88 88 0 1 0 328 183 Z" fill-rule="evenodd"></path>
+          <g clip-path="url(#annulusAmbientWindow)">
+            <g id="annulusAmbientMemories"></g>
+            <path id="annulusNeighborhood" class="open-blob-pink"></path>
+            <path id="annulusHitBlob" class="hit-disk"></path>
+          </g>
+          <g id="annulusRotateGrip" role="button" aria-label="Drag to rotate stamp" style="cursor:alias;touch-action:none">
+            <circle id="annulusRotateStem" r="2.5" fill="#B0A69A" pointer-events="none"></circle>
+            <circle id="annulusRotateDot" r="7" fill="#97A59C" stroke="#746E66" stroke-width="0.9" pointer-events="all"></circle>
+          </g>
+        </svg>
+      </div>
+    </div>
+  </section>
+  <footer class="pilemma-card-footer" aria-label="Pilemma copyright"><span class="pilemma-mark">PILEMMA</span><span>© Pilemma 2026</span></footer>
+</div>
+<div class="story-panel" data-story="1" aria-label="Story 2 of 4">
+<section class="exhibit" id="quotientExhibit" aria-label="Circle as a quotient" >
+    <div class="spaces">
+      <div class="space">
+        <svg class="instrument interval-instrument" id="intervalDiagram" viewBox="0 0 480 385" role="img" aria-label="Interval with selected preimage segments">
+          <line class="base-line" x1="28" y1="183" x2="452" y2="183"></line>
+          <g id="intervalHighlights"></g>
+          <circle id="intervalZero" cx="28" cy="183" r="8.3" class="seam-point"></circle>
+          <circle id="intervalOne" cx="452" cy="183" r="8.3" class="seam-point"></circle>
+        </svg>
+      </div>
+      <div class="space">
+        <svg class="instrument" id="quotCircle" viewBox="0 0 480 385" role="img" aria-label="Circle with selected open arc">
+          <circle class="basecircle" cx="240" cy="183" r="151"></circle>
+          <path id="quotSelected" class="segment"></path>
+          <path id="quotHitPath" stroke="transparent" stroke-width="44" fill="none" cursor="grab"></path>
+          <circle cx="391" cy="183" r="8.3" class="seam-point"></circle>
+        </svg>
+      </div>
+    </div>
+  </section>
+  <footer class="pilemma-card-footer" aria-label="Pilemma copyright"><span class="pilemma-mark">PILEMMA</span><span>© Pilemma 2026</span></footer>
+</div>
+<div class="story-panel" data-story="2" aria-label="Story 3 of 4">
+<section class="exhibit" id="prodSquareExhibit" aria-label="Square product topology" >
+    <div class="spaces">
+
+      <div class="space"><svg class="instrument" id="prodSquareObject" viewBox="52 24 376 350" role="img" aria-label="Square with product open set U times V highlighted">
+        <g id="prodSquareObjectMesh"></g>
+      </svg></div>
+
+      <div class="space"><svg class="instrument" id="prodSquareAtlas" viewBox="52 24 376 350" role="img" aria-label="Two factor opens, projection strips, and their intersection in the product coordinate chart">
+        <rect class="atelier-base" x="120" y="67" width="240" height="240" fill="#c67942"/>
+        <g id="prodSquareStripsU"></g><g id="prodSquareStripsV"></g>
+        <g id="prodSquareRectangles"></g><g id="prodSquareUnion"></g>
+        
+        <line x1="120" y1="348" x2="360" y2="348" class="atelier-bar" stroke="#c67942" stroke-width="4" stroke-linecap="round"/>
+        <line x1="79" y1="307" x2="79" y2="67" class="atelier-bar" stroke="#c67942" stroke-width="4" stroke-linecap="round"/>
+        <g id="prodSquareFactorU"></g><g id="prodSquareFactorV"></g>
+        <rect x="110" y="57" width="260" height="260" fill="transparent" id="prodSquareDragArea"/>
+      </svg></div>
+    </div>
+  </section>
+  <footer class="pilemma-card-footer" aria-label="Pilemma copyright"><span class="pilemma-mark">PILEMMA</span><span>© Pilemma 2026</span></footer>
+</div>
+<div class="story-panel" data-story="3" aria-label="Story 4 of 4">
+<section class="exhibit" id="prodTorusExhibit" aria-label="Circle factors and square fundamental domain for the torus product topology" >
+    <div class="torus-pair">
+      <div class="space"><svg class="instrument" id="prodTorusAtlas" viewBox="54 27 372 320" role="img" aria-label="Square fundamental domain with glued boundaries and product open rectangle">
+        <rect id="torusClayBase" class="atelier-base" x="120" y="67" width="240" height="240" fill="#eadfc5" opacity=".5"/>
+        <g id="prodTorusStripsU"></g><g id="prodTorusStripsV"></g>
+        <g id="prodTorusMemories"></g><g id="prodTorusRectangles"></g><g id="prodTorusUnion"></g>
+        <defs>
+          <clipPath id="torusHorizontalMiters" clipPathUnits="userSpaceOnUse">
+            <path d="M-100 -153H580L240 187Z M-100 527H580L240 187Z"/>
+          </clipPath>
+        </defs>
+        <rect x="120" y="67" width="240" height="240" class="glued-edge-x"/>
+        <rect x="120" y="67" width="240" height="240" class="glued-edge-y" clip-path="url(#torusHorizontalMiters)"/>
+        <line x1="120" y1="348" x2="360" y2="348" class="atelier-bar" stroke="#c67942" stroke-width="4" stroke-linecap="round"/>
+        <line x1="79" y1="307" x2="79" y2="67" class="atelier-bar" stroke="#c67942" stroke-width="4" stroke-linecap="round"/>
+        <g id="prodTorusFactorU"></g><g id="prodTorusFactorV"></g>
+        <rect x="110" y="57" width="260" height="260" fill="transparent" id="prodTorusDragArea"/>
+      </svg></div>
+      <div class="space"><svg class="instrument" id="prodTorusFactors" viewBox="55 40 370 320" role="img" aria-label="Two circle factors for the torus product topology">
+        <circle cx="145" cy="192" r="79" class="factor-circle"></circle>
+        <circle cx="335" cy="192" r="79" class="factor-circle"></circle>
+        <g id="torusFactorArcsU"></g>
+        <g id="torusFactorArcsV"></g>
+        <g id="torusFactorHandlesU"></g>
+        <g id="torusFactorHandlesV"></g>
+        <circle cx="145" cy="113" r="6.9" class="factor-dot factor-glue-x"></circle>
+        <circle cx="335" cy="113" r="6.9" class="factor-dot factor-glue-y"></circle>
+      </svg></div>
+    </div>
+  </section>
+  <footer class="pilemma-card-footer" aria-label="Pilemma copyright"><span class="pilemma-mark">PILEMMA</span><span>© Pilemma 2026</span></footer>
+</div>
+</div>
+</main>
+<div class="shape-picker" id="shapePicker" aria-label="Open shapes">
+    <div class="stamp-dies" role="group" aria-label="Choose a ceramic stamp">
+    <button type="button" class="shape-pick active" data-shape="amoeba" aria-label="Little cloud"><svg viewBox="0 0 40 40"><path d="M7 21C5 10 16 8 21 11C31 5 37 15 32 22C36 30 27 35 20 31C13 36 5 30 7 21Z" fill="#d8c08a"/></svg></button>
+    <button type="button" class="shape-pick" data-shape="feather" aria-label="Feather stamp"><svg viewBox="0 0 40 40"><path d="M11 24C11 14 21 8 30 8C29 18 24 29 14 29C12 29 11 27 11 24ZM14 27L27 12" fill="#d8c08a"/></svg></button>
+    <button type="button" class="shape-pick" data-shape="rain" aria-label="Rain stamp"><svg viewBox="0 0 40 40"><path d="M11 11C15 15 15 18 11 23C7 18 7 15 11 11ZM20 8C24 12 24 15 20 21C16 15 16 12 20 8ZM29 11C33 15 33 18 29 23C25 18 25 15 29 11Z" fill="#d8c08a"/></svg></button>
+    <button type="button" class="shape-pick" data-shape="spiral" aria-label="Spiral stamp"><svg viewBox="0 0 40 40"><path d="M20 7A13 13 0 1 1 7 20C7 12 13 8 20 8C26 8 31 12 31 18C31 23 27 26 23 26C19 26 16 23.5 16 20.5C16 17.6 18.2 16 20.6 16C22.8 16 24 17.4 24 19C24 20.6 22.8 21.8 21.2 21.8C19.8 21.8 18.9 21 18.6 19.8" fill="none" stroke="#d8c08a" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    <button type="button" class="shape-pick" data-shape="islands" aria-label="Two open components"><svg viewBox="0 0 40 40"><ellipse cx="12" cy="22" rx="8" ry="10" fill="#d8c08a"/><ellipse cx="30" cy="17" rx="6.5" ry="7.5" fill="#d8c08a"/></svg></button>
+    <button type="button" class="shape-pick" data-shape="ring" aria-label="Hollow little cloud stamp"><svg viewBox="0 0 40 40" role="img" aria-label="Hollow irregular cloud"><path d="M35.1 20.3 C34 11.4 25.3 6.1 17.3 6.3 C8.4 6.5 4.8 12.2 4.3 20.9 C3.7 29.6 11.3 34.5 20.8 34.8 C30.4 35 36.4 27.7 35.1 20.3 Z M26.9 20.5 C25.9 16.6 22.1 13.3 18.1 14.5 C14.2 15.8 12.9 19.2 13.7 22.4 C14.5 25.2 19 27 22.9 26 C26 25.2 27.8 23.5 26.9 20.5 Z" fill="#d8c08a" fill-rule="evenodd"/></svg></button>
+    <button type="button" class="shape-pick" data-shape="petals" aria-label="Little flower stamp" title="Little flower"><svg viewBox="0 0 40 40"><g fill="#A96F5A"><ellipse cx="20" cy="10" rx="4" ry="6"/><ellipse cx="20" cy="30" rx="4" ry="6"/><ellipse cx="10" cy="20" rx="6" ry="4"/><ellipse cx="30" cy="20" rx="6" ry="4"/><ellipse cx="12.9" cy="12.9" rx="4" ry="5" transform="rotate(-45 12.9 12.9)"/><ellipse cx="27.1" cy="12.9" rx="4" ry="5" transform="rotate(45 27.1 12.9)"/><ellipse cx="12.9" cy="27.1" rx="4" ry="5" transform="rotate(45 12.9 27.1)"/><ellipse cx="27.1" cy="27.1" rx="4" ry="5" transform="rotate(-45 27.1 27.1)"/><circle cx="20" cy="20" r="5.2"/></g></svg></button>
+    <button type="button" class="shape-pick" data-shape="diamond" aria-label="Diamond stamp" title="Diamond"><svg viewBox="0 0 40 40"><path d="M20 4L35 20L20 36L5 20Z" fill="#A96F5A"/></svg></button>
+    <button type="button" class="shape-pick" data-shape="diamond-hollow" aria-label="Hollow diamond stamp" title="Hollow diamond"><svg viewBox="0 0 40 40"><path d="M20 4L35 20L20 36L5 20Z M20 13L11.8 20L20 27L28.2 20Z" fill="#A96F5A" fill-rule="evenodd"/></svg></button>
+    <button type="button" class="shape-pick" data-shape="mesa" aria-label="Stepped mesa stamp" title="Stepped mesa"><svg viewBox="0 0 40 40"><path d="M15 5H25V12H30V19H36V34H4V19H10V12H15Z" fill="#A96F5A"/></svg></button>
+    <button type="button" class="shape-pick" data-shape="zigzag" aria-label="Double zigzag stamp" title="Double zigzag"><svg viewBox="0 0 40 40"><path d="M3 7L11.5 14L20 7L28.5 14L37 7V12L28.5 19L20 12L11.5 19L3 12Z M3 22L11.5 29L20 22L28.5 29L37 22V27L28.5 34L20 27L11.5 34L3 27Z" fill="#A96F5A"/></svg></button>
+    </div>
+    <button type="button" id="artModeSwitch" aria-label="Choose stamp colours" aria-pressed="false" title="Choose stamp colours">COLORS</button>
+    <div id="artInkTray" role="group" aria-label="Santa Fe ceramic ink colours" hidden>
+      <button type="button" class="art-ink" data-art-ink="0" style="--ink:#EFE4D6" title="Bone Paper" aria-label="Bone Paper ink" aria-pressed="true"></button>
+      <button type="button" class="art-ink" data-art-ink="1" style="--ink:#F6EBDD" title="Warm Cream" aria-label="Warm Cream ink" aria-pressed="false"></button>
+      <button type="button" class="art-ink" data-art-ink="2" style="--ink:#C98E78" title="Adobe Rose" aria-label="Adobe Rose ink" aria-pressed="false"></button>
+      <button type="button" class="art-ink" data-art-ink="3" style="--ink:#A96F5A" title="Pueblo Clay" aria-label="Pueblo Clay ink" aria-pressed="false"></button>
+      <button type="button" class="art-ink" data-art-ink="4" style="--ink:#D49A86" title="Dusty Coral" aria-label="Dusty Coral ink" aria-pressed="false"></button>
+      <button type="button" class="art-ink" data-art-ink="5" style="--ink:#B89A93" title="Desert Mauve" aria-label="Desert Mauve ink" aria-pressed="false"></button>
+      <button type="button" class="art-ink" data-art-ink="6" style="--ink:#D6B36A" title="Sun-washed Ochre" aria-label="Sun-washed Ochre ink" aria-pressed="false"></button>
+      <button type="button" class="art-ink" data-art-ink="7" style="--ink:#7E9F9A" title="Turquoise Trace" aria-label="Turquoise Trace ink" aria-pressed="false"></button>
+      <button type="button" class="art-ink" data-art-ink="8" style="--ink:#BFC3AF" title="Dry Sage" aria-label="Dry Sage ink" aria-pressed="false"></button>
+      <button type="button" class="art-ink" data-art-ink="9" style="--ink:#B56F54" title="Terracotta" aria-label="Terracotta ink" aria-pressed="false"></button>
+      <button type="button" class="art-ink" data-art-ink="10" style="--ink:#7C879B" title="Faded Indigo" aria-label="Faded Indigo ink" aria-pressed="false"></button>
+      <button type="button" class="art-ink" data-art-ink="11" style="--ink:#9A8A7A" title="Ash Taupe" aria-label="Ash Taupe ink" aria-pressed="false"></button>
+      <button type="button" class="art-ink" data-art-ink="12" style="--ink:#8B5A3C" title="Canyon Brown" aria-label="Canyon Brown ink" aria-pressed="false"></button>
+      <button type="button" class="art-ink" data-art-ink="13" style="--ink:#614738" title="Dark Roasted Clay" aria-label="Dark Roasted Clay ink" aria-pressed="false"></button>
+    </div>
+  </div>
+<div id="berryRail" class="berry-rail" aria-label="Keep and combine open sets">
+  
+  <div class="berries"><button id="keepBerry" class="berry select" aria-label="Save basis open set" title="Save"></button><button id="unionBerry" class="berry" aria-label="Union mode" title="Union"></button></div>
+</div>
+<div id="specimenRack" class="specimen-rack" aria-label="Saved basis elements"></div>
+<nav class="page-diamonds" aria-label="Cycle through framed mathematical stories">
+  <button type="button" class="page-diamond previous" id="prev" aria-label="Previous mathematical pair" title="Previous pair"><span class="diamond-inside" aria-hidden="true"></span></button>
+  <button type="button" class="page-diamond following" id="next" aria-label="Next mathematical pair" title="Next pair"><span class="diamond-inside" aria-hidden="true"></span></button>
+</nav>
+<script>
+(()=>{
+'use strict';
+const NS='http://www.w3.org/2000/svg';
+const $=id=>document.getElementById(id);
+const PI=Math.PI, TAU=2*PI;
+const S={x:240,y:183,r:151};
+let page=2;
+const visiblePages=[2,1,4,6];
+const storyTrack=$('storyTrack');
+const reducedMotion=window.matchMedia('(prefers-reduced-motion: reduce)');
+const sheet=document.querySelector('.sheet');
+const storyPanels=[...storyTrack.querySelectorAll('.story-panel')];
+const panelPageMap={0:2,1:1,2:4,3:6};
+let scrollOffsetPx=0;
+let slideFallback=null;
+let backgroundDrag=null;
+let activeStoryId=0;
+const panelGap=()=>parseFloat(getComputedStyle(storyTrack).columnGap)||0;
+function panelSpan(p){return p.getBoundingClientRect().width+panelGap();}
+function setScrollOffset(immediate=false){
+  if(immediate||reducedMotion.matches){
+    const prev=storyTrack.style.transition;
+    storyTrack.style.transition='none';
+    storyTrack.style.transform=`translate3d(${-scrollOffsetPx}px,0,0)`;
+    void storyTrack.offsetWidth;
+    storyTrack.style.transition=prev;
+  }else{
+    storyTrack.style.transform=`translate3d(${-scrollOffsetPx}px,0,0)`;
+  }
+}
+// These DOM rotations preserve the exact on-screen coordinates of all
+// existing mathematical instruments. No SVG is cloned and no ID duplicated.
+function moveFirstToEnd(){
+  const p=storyTrack.firstElementChild;
+  const span=panelSpan(p);
+  storyTrack.append(p);
+  scrollOffsetPx-=span;
+  setScrollOffset(true);
+}
+function moveLastToFront(){
+  const p=storyTrack.lastElementChild;
+  const span=panelSpan(p);
+  storyTrack.prepend(p);
+  scrollOffsetPx+=span;
+  setScrollOffset(true);
+}
+function keepLoopFilled(){
+  // Rotate only an off-screen panel, maintaining the cylindrical illusion.
+  for(let i=0;i<storyPanels.length+2;i++){
+    const first=storyTrack.firstElementChild;
+    if(first.getBoundingClientRect().right<0){moveFirstToEnd();continue;}
+    if(first.getBoundingClientRect().left>panelGap()){moveLastToFront();continue;}
+    break;
+  }
+}
+function panelCenter(p){
+  const r=p.getBoundingClientRect();
+  return (r.left+r.right)/2;
+}
+function centeredPanel(){
+  const mid=window.innerWidth/2;
+  return storyPanels.reduce((best,p)=>Math.abs(panelCenter(p)-mid)<Math.abs(panelCenter(best)-mid)?p:best,storyPanels[0]);
+}
+function syncCurrentPage(){
+  const p=centeredPanel();
+  activeStoryId=+p.dataset.story;
+  const nextPage=panelPageMap[activeStoryId];
+  if(nextPage!==page)resetGadgetsForNewStory();
+  page=nextPage;
+  controlsRefresh();
+  paintAllUnions();
+}
+function centerOffsetFor(p){
+  return scrollOffsetPx+panelCenter(p)-window.innerWidth/2;
+}
+function stopAnimation(){
+  if(slideFallback!==null){clearTimeout(slideFallback);slideFallback=null;}
+  if(storyTrack.classList.contains('is-moving')){
+    const matrix=new DOMMatrixReadOnly(getComputedStyle(storyTrack).transform);
+    scrollOffsetPx=-matrix.m41;
+    setScrollOffset(true);
+  }
+  storyTrack.classList.remove('is-moving');
+  document.body.classList.remove('is-scroll-moving');
+}
+function finishStorySlide(){
+  if(slideFallback!==null){clearTimeout(slideFallback);slideFallback=null;}
+  storyTrack.classList.remove('is-moving');
+  document.body.classList.remove('is-scroll-moving');
+  keepLoopFilled();
+  syncCurrentPage();
+}
+function animateToPanel(p,immediate=false){
+  scrollOffsetPx=centerOffsetFor(p);
+  if(immediate||reducedMotion.matches){
+    setScrollOffset(true);finishStorySlide();
+  }else{
+    storyTrack.classList.add('is-moving');
+    document.body.classList.add('is-scroll-moving');
+    setScrollOffset(false);
+    slideFallback=setTimeout(finishStorySlide,520);
+  }
+}
+function flip(direction){
+  if(direction===0){
+    setScrollOffset(true);
+    animateToPanel(storyPanels[0],true);
+    return;
+  }
+  if(backgroundDrag)return;
+  stopAnimation();
+  const current=centeredPanel();
+  let neighbor=direction>0?current.nextElementSibling:current.previousElementSibling;
+  if(!neighbor){
+    if(direction>0)moveFirstToEnd();else moveLastToFront();
+    neighbor=direction>0?current.nextElementSibling:current.previousElementSibling;
+  }
+  if(neighbor)animateToPanel(neighbor);
+}
+storyTrack.addEventListener('transitionend',e=>{
+  if(e.target===storyTrack&&e.propertyName==='transform')finishStorySlide();
+});
+$('prev').addEventListener('click',()=>flip(-1));
+$('next').addEventListener('click',()=>flip(1));
+document.addEventListener('keydown',e=>{
+  if(e.altKey||e.ctrlKey||e.metaKey||['INPUT','TEXTAREA'].includes(document.activeElement.tagName))return;
+  if(e.key==='ArrowRight'){flip(1);e.preventDefault();}
+  if(e.key==='ArrowLeft'){flip(-1);e.preventDefault();}
+});
+// Free horizontal paper drag ONLY outside the colored mathematical windows.
+// Unlike the diamonds this never snaps: the reader can stop between stories.
+sheet.addEventListener('pointerdown',e=>{
+  if(e.pointerType==='mouse'&&e.button!==0)return;
+  if(e.target.closest('.space, svg.instrument, button, a, .paper-open-set, .specimen, .berry-rail, .shape-picker'))return;
+  stopAnimation();
+  backgroundDrag={id:e.pointerId,x:e.clientX,start:scrollOffsetPx};
+  storyTrack.style.transition='none';
+  sheet.classList.add('is-hand-dragging');
+  try{sheet.setPointerCapture(e.pointerId);}catch(err){}
+  e.preventDefault();
+});
+sheet.addEventListener('pointermove',e=>{
+  if(!backgroundDrag||e.pointerId!==backgroundDrag.id)return;
+  scrollOffsetPx=backgroundDrag.start+backgroundDrag.x-e.clientX;
+  setScrollOffset(true);
+  const before=scrollOffsetPx;
+  keepLoopFilled();
+  // Re-basing the strip must also re-base the pointer gesture.
+  backgroundDrag.start+=scrollOffsetPx-before;
+  e.preventDefault();
+});
+function endBackgroundDrag(e){
+  if(!backgroundDrag||e.pointerId!==backgroundDrag.id)return;
+  backgroundDrag=null;
+  sheet.classList.remove('is-hand-dragging');
+  storyTrack.style.transition='';
+  keepLoopFilled();
+  syncCurrentPage();
+}
+sheet.addEventListener('pointerup',endBackgroundDrag);
+sheet.addEventListener('pointercancel',endBackgroundDrag);
+sheet.addEventListener('lostpointercapture',endBackgroundDrag);
+window.addEventListener('resize',()=>{
+  stopAnimation();
+  const intended=storyPanels.find(p=>+p.dataset.story===activeStoryId);
+  if(intended)animateToPanel(intended,true);
+});
+function point(event, svg){const pt=svg.createSVGPoint();pt.x=event.clientX;pt.y=event.clientY;return pt.matrixTransform(svg.getScreenCTM().inverse());}
+function clamp(x,a,b){return Math.min(b,Math.max(a,x));}
+function setAttrs(el,obj){for(const[k,v] of Object.entries(obj))el.setAttribute(k,v)}
+function svgElement(name,attrs){const el=document.createElementNS(NS,name);setAttrs(el,attrs);return el;}
+function wheelRatio(e){const dy=e.deltaY*(e.deltaMode===1?16:e.deltaMode===2?420:1);return Math.exp(clamp(-dy*.0025,-.50,.50));}
+function circlePoint(C,r,a){return {x:C.x+r*Math.cos(a), y:C.y-r*Math.sin(a)};}
+function pathFromParts(parts){return parts.join(' ')}
+function blobRadius(theta,b){
+  return 1 + 0.17*Math.cos(2*theta+b.p1) + 0.10*Math.sin(3*theta+b.p2) + 0.06*Math.cos(5*theta+b.p3);
+}
+function blobPoint(b,theta,scale=1){
+  const rad=blobRadius(theta,b)*b.r*scale;
+  return {x:b.x + b.sx*rad*Math.cos(theta), y:b.y + b.sy*rad*Math.sin(theta)};
+}
+function blobPath(b,scale=1,steps=180){
+  let d='';
+  for(let i=0;i<steps;i++){
+    const t=-PI + TAU*i/steps;
+    const p=blobPoint(b,t,scale);
+    d += (i?'L':'M') + p.x.toFixed(2)+' '+p.y.toFixed(2)+' ';
+  }
+  return d+'Z';
+}
+
+// Geometric clay dies inspired by the forms of Southwest ceramics,
+// not copies of particular community-specific or ceremonial designs.
+const potteryPolygons={
+  diamond:[[[0,-.91],[.84,0],[0,.91],[-.84,0]]],
+  'diamond-hollow':[
+    [[0,-.91],[.84,0],[0,.91],[-.84,0]],
+    [[0,-.40],[-.37,0],[0,.40],[.37,0]] // reverse winding for a hole
+  ],
+  mesa:[[
+    [-.30,-.85],[.30,-.85],[.30,-.52],[.54,-.52],
+    [.54,-.20],[.88,-.20],[.88,.72],[-.88,.72],
+    [-.88,-.20],[-.54,-.20],[-.54,-.52],[-.30,-.52]
+  ]],
+  zigzag:[
+    [[-.90,-.72],[-.45,-.40],[0,-.72],[.45,-.40],[.90,-.72],
+     [.90,-.43],[.45,-.11],[0,-.43],[-.45,-.11],[-.90,-.43]],
+    [[-.90,.13],[-.45,.45],[0,.13],[.45,.45],[.90,.13],
+     [.90,.42],[.45,.74],[0,.42],[-.45,.74],[-.90,.42]]
+  ]
+};
+function stampPolygonPath(b,polygon){
+  return polygon.map(([u,v],i)=>
+    (i?'L':'M')+(b.x+u*b.r*b.sx).toFixed(2)+' '+(b.y+v*b.r*b.sy).toFixed(2)
+  ).join(' ')+' Z ';
+}
+function stampInPolygon(b,p,polygon){
+  const u=(p.x-b.x)/(b.r*b.sx),v=(p.y-b.y)/(b.r*b.sy);
+  let inside=false;
+  for(let i=0,j=polygon.length-1;i<polygon.length;j=i++){
+    const [xi,yi]=polygon[i],[xj,yj]=polygon[j];
+    if(((yi>v)!==(yj>v)) && u<(xj-xi)*(v-yi)/(yj-yi)+xi) inside=!inside;
+  }
+  return inside;
+}
+function shapePath(b){
+  const ellipse=(cx,cy,rx,ry,phase=0,reverse=false)=>{
+    let d='';const N=192;
+    for(let i=0;i<N;i++){
+      const a=(reverse?-1:1)*TAU*i/N;
+      const w=1+.029*Math.sin(3*a+phase)+.022*Math.cos(5*a-phase);
+      d+=(i?'L':'M')+(cx+rx*w*Math.cos(a)).toFixed(2)+' '+(cy+ry*w*Math.sin(a)).toFixed(2)+' ';
+    }
+    return d+'Z ';
+  };
+  if(!b.kind || b.kind==='amoeba') return blobPath(b,1,240);
+  if(b.kind==='ring'){
+    return ellipse(b.x,b.y,b.r*1.06*b.sx,b.r*.98*b.sy,.7)
+         + ellipse(b.x+b.r*.06,b.y-b.r*.02,b.r*.42*b.sx,b.r*.40*b.sy,.55,true);
+  }
+  if(b.kind==='feather'){
+    return ellipse(b.x+b.r*.05*b.sx,b.y,b.r*.86*b.sx,b.r*.38*b.sy,-.78)
+         + ellipse(b.x-b.r*.18*b.sx,b.y+b.r*.05,b.r*.16*b.sx,b.r*.12*b.sy,-.78);
+  }
+  if(b.kind==='rain'){
+    return ellipse(b.x-b.r*.48*b.sx,b.y-b.r*.1,b.r*.22*b.sx,b.r*.33*b.sy,0)
+         + ellipse(b.x,b.y-b.r*.24,b.r*.22*b.sx,b.r*.36*b.sy,0)
+         + ellipse(b.x+b.r*.48*b.sx,b.y-b.r*.1,b.r*.22*b.sx,b.r*.33*b.sy,0);
+  }
+  if(b.kind==='spiral'){
+    return ellipse(b.x-b.r*.12*b.sx,b.y-b.r*.02,b.r*.70*b.sx,b.r*.60*b.sy,.2)
+         + ellipse(b.x+b.r*.16*b.sx,b.y+b.r*.02,b.r*.40*b.sx,b.r*.36*b.sy,.55)
+         + ellipse(b.x+b.r*.32*b.sx,b.y+b.r*.08,b.r*.18*b.sx,b.r*.16*b.sy,.75);
+  }
+  if(b.kind==='islands'){
+    return ellipse(b.x-b.r*.61*b.sx,b.y+b.r*.08,b.r*.54*b.sx,b.r*.60*b.sy,.3)
+         + ellipse(b.x+b.r*.66*b.sx,b.y-b.r*.13,b.r*.52*b.sx,b.r*.48*b.sy,1.1);
+  }
+  if(b.kind==='petals'){
+    let d='';
+    for(let i=0;i<8;i++){
+      const a=i*TAU/8, cx=b.x+Math.cos(a)*b.r*.48*b.sx, cy=b.y+Math.sin(a)*b.r*.48*b.sy;
+      d+=ellipse(cx,cy,b.r*.28*b.sx,b.r*.24*b.sy,a);
+    }
+    return d + ellipse(b.x,b.y,b.r*.23*b.sx,b.r*.2*b.sy,.1);
+  }
+  if(potteryPolygons[b.kind])
+    return potteryPolygons[b.kind].map(polygon=>stampPolygonPath(b,polygon)).join('');
+  return blobPath(b,1,240);
+}
+function stampLocalPoint(b,p){
+  // Inverse transform for all shape hit-tests (including holes in hollow dies).
+  const a=-(b.rotation||0)*PI/180;
+  if(!a)return p;
+  const dx=p.x-b.x,dy=p.y-b.y;
+  return {x:b.x+dx*Math.cos(a)-dy*Math.sin(a),
+          y:b.y+dx*Math.sin(a)+dy*Math.cos(a)};
+}
+function stampRotation(b){
+  return `rotate(${b.rotation||0} ${b.x} ${b.y})`;
+}
+function insideShape(b,p){
+  p=stampLocalPoint(b,p);
+  const ell=(cx,cy,rx,ry,phase)=>{
+    const x=(p.x-cx)/rx,y=(p.y-cy)/ry,theta=Math.atan2(y,x);
+    const w=1+.029*Math.sin(3*theta+phase)+.022*Math.cos(5*theta-phase);
+    return Math.hypot(x,y)<w;
+  };
+  if(!b.kind || b.kind==='amoeba') return insideBlob(b,p);
+  if(b.kind==='ring'){
+    return ell(b.x,b.y,b.r*1.06*b.sx,b.r*.98*b.sy,.7)
+      && !ell(b.x+b.r*.06,b.y-b.r*.02,b.r*.42*b.sx,b.r*.40*b.sy,.55);
+  }
+  if(b.kind==='feather'){
+    return ell(b.x+b.r*.05*b.sx,b.y,b.r*.86*b.sx,b.r*.38*b.sy,-.78)
+      || ell(b.x-b.r*.18*b.sx,b.y+b.r*.05,b.r*.16*b.sx,b.r*.12*b.sy,-.78);
+  }
+  if(b.kind==='rain'){
+    return ell(b.x-b.r*.48*b.sx,b.y-b.r*.1,b.r*.22*b.sx,b.r*.33*b.sy,0)
+      || ell(b.x,b.y-b.r*.24,b.r*.22*b.sx,b.r*.36*b.sy,0)
+      || ell(b.x+b.r*.48*b.sx,b.y-b.r*.1,b.r*.22*b.sx,b.r*.33*b.sy,0);
+  }
+  if(b.kind==='spiral'){
+    return ell(b.x-b.r*.12*b.sx,b.y-b.r*.02,b.r*.70*b.sx,b.r*.60*b.sy,.2)
+      || ell(b.x+b.r*.16*b.sx,b.y+b.r*.02,b.r*.40*b.sx,b.r*.36*b.sy,.55)
+      || ell(b.x+b.r*.32*b.sx,b.y+b.r*.08,b.r*.18*b.sx,b.r*.16*b.sy,.75);
+  }
+  if(b.kind==='islands'){
+    return ell(b.x-b.r*.61*b.sx,b.y+b.r*.08,b.r*.54*b.sx,b.r*.60*b.sy,.3)
+      || ell(b.x+b.r*.66*b.sx,b.y-b.r*.13,b.r*.52*b.sx,b.r*.48*b.sy,1.1);
+  }
+  if(b.kind==='petals'){
+    for(let i=0;i<8;i++){
+      const a=i*TAU/8, cx=b.x+Math.cos(a)*b.r*.48*b.sx, cy=b.y+Math.sin(a)*b.r*.48*b.sy;
+      if(ell(cx,cy,b.r*.28*b.sx,b.r*.24*b.sy,a)) return true;
+    }
+    return ell(b.x,b.y,b.r*.23*b.sx,b.r*.2*b.sy,.1);
+  }
+  if(potteryPolygons[b.kind]){
+    const shapes=potteryPolygons[b.kind];
+    return b.kind==='diamond-hollow'
+      ? stampInPolygon(b,p,shapes[0])&&!stampInPolygon(b,p,shapes[1])
+      : shapes.some(poly=>stampInPolygon(b,p,poly));
+  }
+  return insideBlob(b,p);
+}
+function insideAnyShape(list,p){return list.some(b=>insideShape(b,p));}
+function circleInsideUnionPath(C,r,list){
+  if(!list.length)return '';
+  const N=2200, parts=[];let seg='';
+  for(let j=0;j<=N;j++){
+    const a=-PI+j*TAU/N,p=circlePoint(C,r,a);
+    if(insideAnyShape(list,p))seg+=(seg?'L':'M')+p.x.toFixed(2)+' '+p.y.toFixed(2)+' ';
+    else if(seg){parts.push(seg);seg='';}
+  }
+  if(seg)parts.push(seg);
+  return parts.join(' ');
+}
+function insideBlob(b,p){
+  const dx=(p.x-b.x)/(b.sx*b.r);
+  const dy=(p.y-b.y)/(b.sy*b.r);
+  const theta=Math.atan2(dy,dx);
+  const rr=Math.hypot(dx,dy);
+  return rr < blobRadius(theta,b);
+}
+function blobPointerMode(p,b,svg){
+  const pxScale=Math.max(1,svg.getBoundingClientRect().width);
+  const near=clamp(10*480/pxScale,5,22);
+  const inside=insideShape(b,p);
+  let nearBoundary=false;
+  // Works for the inner boundary of a ring and for individual hand/finger tips.
+  for(let i=0;i<12;i++){
+    const a=i*TAU/12;
+    if(insideShape(b,{x:p.x+near*Math.cos(a),y:p.y+near*Math.sin(a)})!==inside){
+      nearBoundary=true;break;
+    }
+  }
+  return nearBoundary?'resize':inside?'move':'relocate';
+}
+function circleInsideBlobPath(C,r,b){
+  const N=1152, parts=[]; let seg='';
+  for(let j=0;j<=N;j++){
+    const theta=-PI+j*TAU/N;
+    const p=circlePoint(C,r,theta);
+    const inside=insideShape(b,p);
+    if(inside) seg+=(seg?'L':'M')+p.x.toFixed(2)+' '+p.y.toFixed(2)+' ';
+    else if(seg){parts.push(seg);seg='';}
+  }
+  if(seg) parts.push(seg);
+  return pathFromParts(parts);
+}
+function attachBlobInteraction(svg, blob, render, hitId){
+  let drag=null;
+  const hit=$(hitId);
+  svg.addEventListener('pointerdown',e=>{
+    if(unionMode && page===6)return;
+    if(e.pointerType==='mouse'&&e.button!==0)return;
+    const p=point(e,svg), mode=blobPointerMode(p,blob,svg);
+    const isRotateGrip=blob===annBlob && !!e.target.closest('#annulusRotateGrip');
+    if(isRotateGrip || (blob===annBlob&&e.altKey)){
+      drag={mode:'rotate',startAngle:Math.atan2(p.y-blob.y,p.x-blob.x),
+        startRotation:blob.rotation||0};
+      svg.setPointerCapture(e.pointerId);e.preventDefault();return;
+    }
+    drag={mode:mode==='resize'?'resize':'move', dx:p.x-blob.x, dy:p.y-blob.y};
+    if(mode==='relocate'){blob.x=p.x; blob.y=p.y; drag.dx=0; drag.dy=0;}
+    svg.setPointerCapture(e.pointerId); render(); e.preventDefault();
+  });
+  svg.addEventListener('pointermove',e=>{
+    const p=point(e,svg);
+    if(!drag){
+      const mode=blobPointerMode(p,blob,svg);
+      svg.style.cursor=mode==='resize'?'nwse-resize':mode==='move'?'grab':'crosshair';
+      return;
+    }
+    if(drag.mode==='rotate'){
+      const a=Math.atan2(p.y-blob.y,p.x-blob.x);
+      const da=Math.atan2(Math.sin(a-drag.startAngle),Math.cos(a-drag.startAngle));
+      blob.rotation=drag.startRotation+da*180/PI;
+    }else if(drag.mode==='resize'){
+      const local=stampLocalPoint(blob,p);
+      blob.r=clamp(Math.hypot((local.x-blob.x)/blob.sx,(local.y-blob.y)/blob.sy),22,320);
+    }else {blob.x=clamp(p.x-drag.dx,-55,535); blob.y=clamp(p.y-drag.dy,-55,440);}
+    render();
+  });
+  function end(){drag=null; svg.style.cursor='';}
+  svg.addEventListener('pointerup',end); svg.addEventListener('pointercancel',end); svg.addEventListener('lostpointercapture',end);
+  svg.addEventListener('wheel',e=>{e.preventDefault(); if(blob===annBlob&&e.shiftKey){blob.rotation=(blob.rotation||0)-Math.sign(e.deltaY)*5;}else blob.r=clamp(blob.r*wheelRatio(e),22,320); render();},{passive:false});
+}
+// Page 1: circle as subspace
+// Page 2: quotient circle and interval preimage
+const quot=$('quotCircle'); let center=0, half=.89, arcDrag=null;
+function delta(a,b){return Math.atan2(Math.sin(a-b),Math.cos(a-b));}
+function norm01(a){let t=a/TAU; t%=1; if(t<0)t+=1; return t;}
+function xAt(t){return 28+424*t;}
+function intervalSegments(center,half){ let lo=norm01(center-half), hi=norm01(center+half); return lo<=hi?[[lo,hi]]:[[0,hi],[lo,1]]; }
+function renderQuotient(){
+  const p=(()=>{let out=''; const N=200; for(let i=0;i<=N;i++){const a=center-half+2*half*i/N; const pt=circlePoint(S,S.r,a); out+=(i?'L':'M')+pt.x.toFixed(2)+' '+pt.y.toFixed(2)+' ';} return out;})();
+  ['quotSelected','quotHitPath'].forEach(id=>$(id).setAttribute('d',p));
+  const g=$('intervalHighlights'); g.replaceChildren();
+  const segs=intervalSegments(center,half);
+  for(const [lo,hi] of segs){
+    if(hi-lo<1e-6) continue;
+    const coords={x1:xAt(lo), y1:183, x2:xAt(hi), y2:183, 'stroke-linecap':'round'};
+    g.append(svgElement('line',{...coords,stroke:'#c4b58a','stroke-width':10.5}));
+
+  }
+}
+function hitWhichEnd(p){
+  const a=center-half, b=center+half; const A=circlePoint(S,S.r,a), B=circlePoint(S,S.r,b);
+  const da=Math.hypot(p.x-A.x,p.y-A.y), db=Math.hypot(p.x-B.x,p.y-B.y); const tol=20*480/Math.max(1,quot.getBoundingClientRect().width);
+  if(da<tol && da<=db) return 'a'; if(db<tol) return 'b'; return null;
+}
+quot.addEventListener('pointerdown',e=>{
+  if(e.pointerType==='mouse'&&e.button!==0)return;
+  const p=point(e,quot), end=hitWhichEnd(p);
+  arcDrag=end?{kind:end,start:Math.atan2(S.y-p.y,p.x-S.x), centerStart:center, halfStart:half}:{kind:'move', start:Math.atan2(S.y-p.y,p.x-S.x), centerStart:center};
+  quot.setPointerCapture(e.pointerId); e.preventDefault();
+});
+quot.addEventListener('pointermove',e=>{
+  const p=point(e,quot);
+  if(!arcDrag){quot.style.cursor=hitWhichEnd(p)?'crosshair':'grab'; return;}
+  const a=Math.atan2(S.y-p.y,p.x-S.x);
+  if(arcDrag.kind==='move') center=arcDrag.centerStart + delta(a,arcDrag.start);
+  else if(arcDrag.kind==='a'){ const endA=arcDrag.centerStart-arcDrag.halfStart + delta(a,arcDrag.start); half=clamp(Math.abs(delta(arcDrag.centerStart+arcDrag.halfStart,endA))/2,.19,PI-.18); center=(endA + (arcDrag.centerStart+arcDrag.halfStart))/2; }
+  else { const endB=arcDrag.centerStart+arcDrag.halfStart + delta(a,arcDrag.start); half=clamp(Math.abs(delta(endB,arcDrag.centerStart-arcDrag.halfStart))/2,.19,PI-.18); center=((arcDrag.centerStart-arcDrag.halfStart) + endB)/2; }
+  renderQuotient();
+});
+function endArcDrag(){arcDrag=null; quot.style.cursor='';}
+quot.addEventListener('pointerup',endArcDrag); quot.addEventListener('pointercancel',endArcDrag); quot.addEventListener('lostpointercapture',endArcDrag);
+for(const svg of [quot,$('intervalDiagram')]) svg.addEventListener('wheel',e=>{e.preventDefault(); half=clamp(half*wheelRatio(e),.19,PI-.18); renderQuotient();},{passive:false});
+
+// Page 3: annulus as subspace, fill only, no boundary stroke
+const annBlob={kind:'amoeba',x:314,y:146,r:82,sx:1.16,sy:.98,rotation:0,p1:1.0,p2:-.3,p3:.6};
+// Make one canonical SVG outline centered at the origin.  Moving the paper
+// changes only a lightweight translation, not three long d= path strings.
+// This avoids stale paint tiles along the edge of the clipped SVG in Safari.
+let annulusOutline='';
+function paintAnnulusSaved(){
+  const ambient=$('annulusAmbientMemories'), cut=$('annulusPreMemories');
+  ambient.replaceChildren(); cut.replaceChildren();
+  for(const item of (cabinets[2]||[])){
+    const d=shapePath(item.value), ink=item.inkHex
+      ? {hex:item.inkHex,opacity:.92}
+      : annulusStampInk(item.colorIndex||0);
+    const transform=stampRotation(item.value);
+    ambient.append(svgElement('path',{d,transform,fill:ink.hex,class:'saved-stamp-ambient','fill-rule':'evenodd'}));
+    cut.append(svgElement('path',{d,transform,fill:ink.hex,class:'saved-stamp-cut','fill-rule':'evenodd'}));
+  }
+}
+function renderAnnulus(){
+  const p=shapePath({...annBlob,x:0,y:0});
+  const transform=`translate(${annBlob.x} ${annBlob.y}) rotate(${annBlob.rotation||0})`;
+  for(const id of ['annulusNeighborhood','annulusPreIntersection','annulusHitBlob']){
+    const el=$(id);
+    if(p!==annulusOutline)el.setAttribute('d',p);
+    el.setAttribute('fill-rule','evenodd');
+    el.setAttribute('transform',transform);
+  }
+  annulusOutline=p;
+  const theta=((annBlob.rotation||0)-68)*PI/180;
+  const len=annBlob.r*1.35;
+  const hx=annBlob.x+Math.cos(theta)*len*annBlob.sx;
+  const hy=annBlob.y+Math.sin(theta)*len*annBlob.sy;
+  const dot=$('annulusRotateDot');
+  dot.setAttribute('cx',hx);dot.setAttribute('cy',hy);
+  const stem=$('annulusRotateStem');
+  stem.setAttribute('cx',annBlob.x+Math.cos(theta)*(len-14)*annBlob.sx);
+  stem.setAttribute('cy',annBlob.y+Math.sin(theta)*(len-14)*annBlob.sy);
+}
+attachBlobInteraction($('annulusAmbient'),annBlob,renderAnnulus,'annulusHitBlob');
+$('annulusPre').addEventListener('wheel',e=>{e.preventDefault(); if(e.shiftKey)annBlob.rotation=(annBlob.rotation||0)-Math.sign(e.deltaY)*5;else annBlob.r=clamp(annBlob.r*wheelRatio(e),22,320); renderAnnulus();},{passive:false});
+
+// PRODUCT TOPOLOGY: basic opens U×V = π₁⁻¹(U) ∩ π₂⁻¹(V).
+// SQUARE: I×I; CYLINDER: S¹×I; TORUS: S¹×S¹.
+// The coordinate charts use the quotient seams consistently: s=0~1 iff cyclic.
+const productModels={
+  Square:{s:.49,t:.58,rs:.22,rt:.22,cyclicS:false,cyclicT:false},
+  Torus:{s:.025,t:.035,rs:.16,rt:.20,cyclicS:true,cyclicT:true}
+};
+function productIntervals(c,r,cyclic){
+  if(!cyclic)return [[clamp(c-r,0,1),clamp(c+r,0,1)]];
+  let intervals=[];
+  for(let k=-1;k<=1;k++){
+    const a=clamp(c-r+k,0,1),b=clamp(c+r+k,0,1);
+    if(b>a+1e-8) intervals.push([a,b]);
+  }
+  intervals.sort((u,v)=>u[0]-v[0]);
+  return intervals;
+}
+function productMember(x,c,r,cyclic){
+  return cyclic ? Math.abs(((x-c+.5)%1+1)%1-.5)<r : Math.abs(x-c)<r;
+}
+function factorCirclePath(cx,cy,R,a,b){
+  const N=Math.max(18,Math.ceil(160*(b-a))); let d='';
+  for(let i=0;i<=N;i++){
+    const t=a+(b-a)*i/N, ang=TAU*t-PI/2;
+    const x=cx+R*Math.cos(ang), y=cy+R*Math.sin(ang);
+    d+=(i?'L':'M')+x.toFixed(2)+' '+y.toFixed(2)+' ';
+  }
+  return d;
+}
+function drawFactorCircleArcs(group, cx, cy, R, intervals, cls, which){
+  group.replaceChildren();
+  for(const [a,b] of intervals){
+    const d=factorCirclePath(cx,cy,R,a,b);
+    group.append(svgElement('path',{d,class:cls}));
+    // Grabbing the *selected arc* moves its centre. The unselected circle
+    // and the surrounding SVG are not drag targets.
+    group.append(svgElement('path',{d,fill:'none',stroke:'transparent',
+      'stroke-width':23,'pointer-events':'stroke','data-factor-role':'move',
+      'data-which':which,style:'cursor:grab;touch-action:none'}));
+  }
+}
+function nearestOnFactorCircle(p,cx,cy){
+  return ((Math.atan2(p.y-cy,p.x-cx)+PI/2)/TAU%1+1)%1;
+}
+function factorCircleXY(cx,cy,R,t){
+  const ang=TAU*t-PI/2;
+  return {x:cx+R*Math.cos(ang), y:cy+R*Math.sin(ang)};
+}
+function unwrapNear(x,ref){
+  while(x-ref>0.5)x-=1;
+  while(x-ref<-0.5)x+=1;
+  return x;
+}
+function drawFactorHandles(group,cx,cy,R,c,r,which){
+  group.replaceChildren();
+  const start=((c-r)%1+1)%1, end=((c+r)%1+1)%1;
+  const pts=[['start',start,'factor-handle-open'],['end',end,'factor-handle-open']];
+  for(const [side,t,klass] of pts){
+    const p=factorCircleXY(cx,cy,R,t);
+    const hit=svgElement('circle',{cx:p.x,cy:p.y,r:17,class:'factor-handle-hit',
+      'data-factor-role':'endpoint'});
+    hit.dataset.which=which; hit.dataset.side=side;
+    group.append(hit);
+  }
+}
+function torusParamPoint(s,t){
+  const a=TAU*s,b=TAU*t,R=106,r=44;
+  const x=(R+r*Math.cos(b))*Math.cos(a), y=(R+r*Math.cos(b))*Math.sin(a),z=r*Math.sin(b);
+  return [240+x*.97,192-y*.43-z*.88, y*.89-z*.25];
+}
+function paramCurve(kind,val,steps=240){
+  let d='';
+  for(let i=0;i<=steps;i++){
+    const u=i/steps; const p=kind==='s'?torusParamPoint(val,u):torusParamPoint(u,val);
+    d+=(i?'L':'M')+p[0].toFixed(2)+' '+p[1].toFixed(2)+' ';
+  }
+  return d;
+}
+function sketchCurve(kind,val,amp=.9,steps=240,phase=0){
+  let d='';
+  for(let i=0;i<=steps;i++){
+    const u=i/steps;
+    let p=kind==='s'?torusParamPoint(val,u):torusParamPoint(u,val);
+    const q=kind==='s'?torusParamPoint(val,(u+.004)%1):torusParamPoint((u+.004)%1,val);
+    let tx=q[0]-p[0], ty=q[1]-p[1];
+    const L=Math.hypot(tx,ty)||1; tx/=L; ty/=L;
+    const nx=-ty, ny=tx;
+    const wob=amp*(0.65*Math.sin(TAU*(1.7*u+phase))+0.35*Math.sin(TAU*(3.3*u+phase*.7)));
+    const x=p[0]+nx*wob, y=p[1]+ny*wob;
+    d+=(i?'L':'M')+x.toFixed(2)+' '+y.toFixed(2)+' ';
+  }
+  return d;
+}
+const PR={x:120,y:67,size:240};
+const AX=x=>PR.x+PR.size*x;
+const AY=y=>PR.y+PR.size*(1-y);
+function appendRect(g,x,y,w,h,fill,opacity){
+  g.append(svgElement('rect',{x,y,width:w,height:h,fill,'fill-opacity':opacity}));
+}
+
+const cabinets={0:[],2:[],4:[],5:[],6:[]};
+let unionMode=false, serial=0;
+// Only the most recently *just-cut* fourth-page basis stays colored in Cut.
+// As soon as a new candidate is manipulated, it joins the gray imprints.
+let torusFreshCutId=null;
+const pageForProduct={Square:4,Torus:6};
+const pageForShape={2:annBlob};
+// Opaque ceramic-paper colours for saved basis elements on both product pages.
+// These are visual identities for B_1, B_2, ...; they do not alter membership.
+const squareBasisPalette=[
+  {hex:'#fff0d2',opacity:1}, // warm slip
+  {hex:'#f2ce78',opacity:1}, // wheat yellow
+  {hex:'#eda36b',opacity:1}, // light fired orange
+  {hex:'#813e2e',opacity:1}, // red ochre
+  {hex:'#bcb6aa',opacity:1}  // limestone grey
+];
+const annulusStampPalette=[
+  {hex:'#EFE4D6',opacity:.94}, // bone paper
+  {hex:'#F6EBDD',opacity:.94}, // warm cream
+  {hex:'#C98E78',opacity:.92}, // adobe rose
+  {hex:'#A96F5A',opacity:.92}, // pueblo clay
+  {hex:'#D49A86',opacity:.92}, // dusty coral
+  {hex:'#B89A93',opacity:.92}, // desert mauve
+  {hex:'#D6B36A',opacity:.92}, // sun-washed ochre
+  {hex:'#7E9F9A',opacity:.9},  // turquoise trace
+  {hex:'#BFC3AF',opacity:.92}, // dry sage
+  {hex:'#B56F54',opacity:.92}, // terracotta
+  {hex:'#7C879B',opacity:.9},  // faded indigo
+  {hex:'#9A8A7A',opacity:.92}, // ash taupe
+  {hex:'#8B5A3C',opacity:.96}, // canyon brown
+  {hex:'#614738',opacity:.96}  // dark roasted clay
+];
+const basisInk=i=>squareBasisPalette[i%squareBasisPalette.length];
+const annulusStampInk=i=>annulusStampPalette[i%annulusStampPalette.length];
+// Art mode is opt-in. These ceramic pigments are fixed per saved impression.
+const artInkColors=[
+  '#EFE4D6','#F6EBDD','#C98E78','#A96F5A',
+  '#D49A86','#B89A93','#D6B36A','#7E9F9A',
+  '#BFC3AF','#B56F54','#7C879B','#9A8A7A',
+  '#8B5A3C','#614738'
+];
+let artMode=false, selectedArtInk=0;
+function refreshArtMode(){
+  const active=artMode && page===2;
+  const toggle=$('artModeSwitch'),tray=$('artInkTray');
+  toggle.textContent='COLORS';
+  toggle.setAttribute('aria-pressed',String(active));
+  toggle.setAttribute('aria-label',active?'Colors on. Return to automatic ink':'Choose stamp ink colours');
+  toggle.title=active?'COLORS on · click for automatic ink':'Choose stamp ink colours';
+  tray.hidden=!active;
+  for(const btn of tray.querySelectorAll('.art-ink'))
+    btn.setAttribute('aria-pressed',String(+btn.dataset.artInk===selectedArtInk));
+  // The next imprint already has a real pigment: AUTO takes the next
+  // Santa Fe swatch, ART uses the selected pigment. Neither touches saved ink.
+  syncAnnulusPreviewInk();
+}
+function syncAnnulusPreviewInk(){
+  const preview=$('annulusPreIntersection');
+  if(!preview)return;
+  // The hovering, not-yet-fired stamp stays the original paper white.
+  // AUTO / ART only determines the colour once the impression is saved.
+  preview.style.fill='#EFE4D6';
+  preview.style.fillOpacity='1';
+}
+$('artModeSwitch').addEventListener('click',()=>{
+  if(page!==2)return;
+  artMode=!artMode;
+  refreshArtMode();
+});
+for(const inkButton of document.querySelectorAll('#artInkTray .art-ink')){
+  inkButton.addEventListener('click',()=>{
+    if(page!==2)return;
+    selectedArtInk=+inkButton.dataset.artInk;
+    artMode=true;
+    refreshArtMode();
+  });
+}
+
+// Sunset paper collection: six gentle families x four opaque shades.
+// All 24 colours appear once in an ink cycle before a colour can repeat.
+const printInkFamilies=[
+  ['#FFF1DC','#FFF5E6','#F8EAD5','#FCEBD0'], // milk
+  ['#F9E7C4','#F5DFB8','#FDEBCF','#EED8B9'], // cream
+  ['#F1D59A','#F6DFA7','#E9C989','#F4DCA9'], // butter
+  ['#F3E4E0','#F7EBE5','#EEDAD5','#F1DDDA'], // pearl
+  ['#F5CBB8','#F8D4C0','#EFBDAF','#F5C1A9'], // peach
+  ['#F7B97C','#F9C68C','#EFAE73','#F5A980']  // papaya
+];
+const printInks=printInkFamilies.flat();
+const clayKiln=['#88554C','#A36B56','#513943','#66443D'];
+const torusDreamClay=['#7A6675','#8C6E78','#6F6A84','#9C7B67'];
+const inkQueue={4:[],6:[]}, clayQueue={4:[],6:[]};
+const chosenClay={4:clayKiln[0],6:clayKiln[2]};
+const lastClay={4:null,6:null};
+function shuffled(items){
+  const copy=items.slice();
+  for(let i=copy.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [copy[i],copy[j]]=[copy[j],copy[i]];
+  }
+  return copy;
+}
+function nextPaperInk(page){
+  if(!inkQueue[page].length){
+    // Shuffle within each family, then interleave the families in rounds.
+    // This keeps adjacent paper pieces varied while covering all 24 shades.
+    const families=printInkFamilies.map((f,i)=>shuffled([0,1,2,3]).map(j=>i*4+j));
+    const selections=[];
+    for(let round=0;round<4;round++){
+      const order=shuffled([0,1,2,3,4,5]);
+      if(selections.length && order[0]===Math.floor(selections[selections.length-1]/4)){
+        [order[0],order[1]]=[order[1],order[0]];
+      }
+      for(const f of order)selections.push(families[f][round]);
+    }
+    inkQueue[page]=selections;
+  }
+  return inkQueue[page].shift();
+}
+function chooseClayFor(page){
+  if(page!==4&&page!==6)return;
+  if(!clayQueue[page].length){
+    clayQueue[page]=shuffled(page===6?torusDreamClay:clayKiln);
+    if(clayQueue[page][0]===lastClay[page]){
+      [clayQueue[page][0],clayQueue[page][1]]=[clayQueue[page][1],clayQueue[page][0]];
+    }
+  }
+  chosenClay[page]=clayQueue[page].shift();
+  lastClay[page]=chosenClay[page];
+  if(page===6)$('prodTorusExhibit').style.setProperty('--chosen-clay',chosenClay[page]);
+}
+const savedPaperInk=item=>item.page===2
+  ? annulusStampInk(item.colorIndex||0)
+  : (item.page===4||item.page===6)
+    ? {hex:printInks[item.colorIndex%printInks.length],opacity:1}
+    : basisInk(item.colorIndex||0);
+
+const deepCopy=obj=>JSON.parse(JSON.stringify(obj));
+function selectedCabinet(){return cabinets[page]||[];}
+function placedCabinet(n){return (cabinets[n]||[]).filter(o=>o.placed);}
+function paintProductUnion(name){
+  const g=$('prod'+name+'Union');if(!g)return;g.replaceChildren();
+  const memories=name==='Torus' ? $('prodTorusMemories') : null;
+  if(memories)memories.replaceChildren();
+  const o=productModels[name],entries=placedCabinet(pageForProduct[name]);
+  for(const q of entries){
+    const fresh=name==='Torus' && !unionMode && q.id===torusFreshCutId;
+    const target=name==='Torus' && !unionMode && !fresh ? memories : g;
+    const piece=svgElement('g',{'data-cut-id':q.id,
+      'data-cut-state':name==='Torus'?(unionMode?'revealed':fresh?'fresh':'imprint'):'placed'});
+    target.append(piece);
+    // Torus basis paper stays mathematically fixed: no drag handler at all.
+    const us=productIntervals(q.value.s,q.value.rs,o.cyclicS),
+      vs=productIntervals(q.value.t,q.value.rt,o.cyclicT);
+    for(const [a,b] of us)for(const [c,d] of vs){
+      const attrs={x:AX(a),y:AY(d),width:PR.size*(b-a),height:PR.size*(d-c)};
+      if(name==='Square'){
+        if(!unionMode) continue;
+        piece.append(svgElement('rect',Object.assign(attrs,{class:'union-patch',style:'fill:#fff0d2;opacity:.92'})));
+      }else if(unionMode || fresh){
+        const tint=savedPaperInk(q);
+        piece.append(svgElement('rect',Object.assign(attrs,{
+          class:'union-patch',style:`fill:${tint.hex};opacity:${tint.opacity}`
+        })));
+      }else{
+        piece.append(svgElement('rect',attrs));
+      }
+    }
+  }
+}
+
+function paintRegionUnion(id,n){
+  const g=$(id);g.replaceChildren();if(!unionMode)return;
+  for(const obj of placedCabinet(n)){
+    const tint=basisInk(obj.colorIndex||0);
+    g.append(svgElement('path',{d:shapePath(obj.value),
+      transform:n===2?stampRotation(obj.value):undefined,class:'union-open',
+      fill:tint.hex,'fill-opacity':tint.opacity,'fill-rule':'evenodd'}));
+  }
+}
+function paintAllUnions(){
+  paintRegionUnion('annulusUnion',2);
+  for(const name of Object.keys(pageForProduct))paintProductUnion(name);
+  // The geometric product models show the same assembled union as the fundamental chart.
+  for(const name of ['Square'])renderProduct(name);
+}
+function boardGeometry(item){
+  return item.page===4
+    ? {target:$('prodSquareObject'),layer:$('prodSquareObjectMesh'),x:92,y:44,size:296,cyclic:false}
+    : {target:$('prodTorusAtlas'),layer:$('prodTorusUnion'),x:120,y:67,size:240,cyclic:true};
+}
+function boardContainsPoint(item,e){
+  const b=boardGeometry(item),p=point(e,b.target);
+  return p.x>=b.x&&p.x<=b.x+b.size&&p.y>=b.y&&p.y<=b.y+b.size;
+}
+function boardScreenRect(item){
+  const b=boardGeometry(item),m=b.target.getScreenCTM();
+  if(!m)return null;
+  const corners=[[b.x,b.y],[b.x+b.size,b.y],[b.x+b.size,b.y+b.size],[b.x,b.y+b.size]]
+    .map(([x,y])=>({x:m.a*x+m.c*y+m.e,y:m.b*x+m.d*y+m.f}));
+  return {left:Math.min(...corners.map(p=>p.x)),right:Math.max(...corners.map(p=>p.x)),
+    top:Math.min(...corners.map(p=>p.y)),bottom:Math.max(...corners.map(p=>p.y))};
+}
+function touchesClay(item,left,top,width,height){
+  const b=boardScreenRect(item);
+  if(!b)return false;
+  return left<b.right&&left+width>b.left&&top<b.bottom&&top+height>b.top;
+}
+let snapPreview=null;
+function clearSnapPreview(){
+  if(snapPreview){snapPreview.remove();snapPreview=null;}
+}
+function showHomeSnap(item){
+  if(snapPreview&&snapPreview.dataset.itemId===String(item.id))return;
+  clearSnapPreview();
+  const b=boardGeometry(item),g=svgElement('g',{'pointer-events':'none','data-item-id':item.id,class:'home-snap-preview'});
+  const o=productModels[item.page===4?'Square':'Torus'];
+  const ink=savedPaperInk(item);
+  const is=productIntervals(item.value.s,item.value.rs,o.cyclicS);
+  const it=productIntervals(item.value.t,item.value.rt,o.cyclicT);
+  for(const [a,c] of is)for(const [d,e] of it){
+    g.append(svgElement('rect',{
+      x:b.x+b.size*a,y:b.y+b.size*(1-e),width:b.size*(c-a),height:b.size*(e-d),
+      fill:ink.hex,'fill-opacity':.98,
+      stroke:'#fff5e4','stroke-opacity':.55,'stroke-width':1.2
+    }));
+  }
+  b.layer.append(g);
+  snapPreview=g;
+}
+function attachPlacedDrag(group,item,target){
+  group.classList.add('placed-paper');
+  let drag=null;
+  group.addEventListener('pointerdown',e=>{
+    if(!unionMode)return;
+    if(e.pointerType==='mouse'&&e.button!==0)return;
+    const m=target.getScreenCTM(),scale=Math.hypot(m.a,m.b)||1;
+    drag={pointerId:e.pointerId,x:e.clientX,y:e.clientY,scale};
+    group.setPointerCapture(e.pointerId);
+    e.stopPropagation();e.preventDefault();
+  });
+  group.addEventListener('pointermove',e=>{
+    if(!drag||e.pointerId!==drag.pointerId)return;
+    e.stopPropagation();
+    // The paper can be peeled off, but it cannot be moved to a false
+    // product-coordinate position while it is attached to the clay.
+    if(boardContainsPoint(item,e))group.removeAttribute('transform');
+    else group.setAttribute('transform',`translate(${(e.clientX-drag.x)/drag.scale} ${(e.clientY-drag.y)/drag.scale})`);
+  });
+  group.addEventListener('pointerup',e=>{
+    if(!drag||e.pointerId!==drag.pointerId)return;
+    e.stopPropagation();e.preventDefault();
+    const dx=e.clientX-drag.x,dy=e.clientY-drag.y;
+    drag=null;group.removeAttribute('transform');
+    if(Math.hypot(dx,dy)<=5 || boardContainsPoint(item,e)){
+      // Snap home when released anywhere inside the clay board.
+      item.boardDX=0;item.boardDY=0;
+      return;
+    }
+    const b=boardGeometry(item),shape=cutoutGeometry(item),m=target.getScreenCTM();
+    const ax=b.x+shape.x,ay=b.y+shape.y;
+    item.paperX=m.a*ax+m.c*ay+m.e+dx;
+    item.paperY=m.b*ax+m.d*ay+m.f+dy;
+    item.paperScale=Math.hypot(m.a,m.b);
+    const pw=shape.w*item.paperScale,ph=shape.h*item.paperScale;
+    item.paperX=clamp(item.paperX,8,Math.max(8,innerWidth-pw-8));
+    item.paperY=clamp(item.paperY,8,Math.max(8,innerHeight-ph-10));
+    item.placed=false;
+    item.boardDX=0;item.boardDY=0;
+    controlsRefresh();paintAllUnions();
+  });
+  group.addEventListener('pointercancel',()=>{drag=null;group.removeAttribute('transform');});
+  group.addEventListener('lostpointercapture',()=>{drag=null;group.removeAttribute('transform');});
+}
+function cutoutGeometry(item){
+  const model=item.page===4?'Square':'Torus', q=productModels[model];
+  const size=item.page===4?296:PR.size;
+  const pieces=[];
+  for(const [a,b] of productIntervals(item.value.s,item.value.rs,q.cyclicS))
+    for(const [c,d] of productIntervals(item.value.t,item.value.rt,q.cyclicT))
+      pieces.push({x:size*a,y:size*(1-d),w:size*(b-a),h:size*(d-c)});
+  const x=Math.min(...pieces.map(p=>p.x)),y=Math.min(...pieces.map(p=>p.y));
+  return {pieces,x,y,w:Math.max(...pieces.map(p=>p.x+p.w))-x,h:Math.max(...pieces.map(p=>p.y+p.h))-y};
+}
+function rackRefresh(){
+  clearSnapPreview();
+  const rack=$('specimenRack');rack.replaceChildren();
+  for(const obj of selectedCabinet()){
+    if(obj.placed)continue;
+    const shape=cutoutGeometry(obj),scale=obj.paperScale;
+    const w=shape.w*scale,h=shape.h*scale;
+    const paper=document.createElement('div');paper.className='paper-open-set';
+    paper.style.cssText=`left:${obj.paperX}px;top:${obj.paperY}px;width:${w}px;height:${h}px`;
+    const ink=savedPaperInk(obj);
+    paper.innerHTML=`<svg width="${w}" height="${h}" viewBox="${shape.x} ${shape.y} ${shape.w} ${shape.h}" aria-label="Saved open set">${shape.pieces.map(p=>`<rect x="${p.x}" y="${p.y}" width="${p.w}" height="${p.h}" fill="${ink.hex}" fill-opacity="${ink.opacity}"/>`).join('')}</svg>`;
+    let drag=null;
+    paper.addEventListener('pointerdown',e=>{
+      if(e.pointerType==='mouse'&&e.button!==0)return;
+      drag={pointerId:e.pointerId,x:e.clientX,y:e.clientY,left:obj.paperX,top:obj.paperY,entered:false};
+      paper.setPointerCapture(e.pointerId);
+      paper.style.zIndex='2';e.preventDefault();
+    });
+    paper.addEventListener('pointermove',e=>{
+      if(!drag||e.pointerId!==drag.pointerId)return;
+      obj.paperX=drag.left+e.clientX-drag.x;
+      obj.paperY=drag.top+e.clientY-drag.y;
+      paper.style.left=obj.paperX+'px';paper.style.top=obj.paperY+'px';
+      const moved=Math.hypot(e.clientX-drag.x,e.clientY-drag.y)>4;
+      const touching=moved&&unionMode&&touchesClay(obj,obj.paperX,obj.paperY,w,h);
+      // On first contact, the paper previews at its ORIGINAL home coordinates.
+      // The floating copy reappears if the user drags away without releasing.
+      if(touching){
+        if(!drag.entered)showHomeSnap(obj);
+        paper.style.opacity='0';
+      }else{
+        if(drag.entered)clearSnapPreview();
+        paper.style.opacity='';
+      }
+      drag.entered=touching;
+    });
+    paper.addEventListener('pointerup',e=>{
+      if(!drag||e.pointerId!==drag.pointerId)return;
+      const moved=Math.hypot(e.clientX-drag.x,e.clientY-drag.y)>4;
+      const contact=moved&&unionMode&&touchesClay(obj,obj.paperX,obj.paperY,w,h);
+      drag=null;paper.style.zIndex='';paper.style.opacity='';
+      clearSnapPreview();
+      if(contact){
+        // The saved parameters encode its actual place in the space.
+        // Never offset a basis element to the accidental release position.
+        obj.boardDX=0;obj.boardDY=0;
+        obj.placed=true;controlsRefresh();paintAllUnions();
+      }
+    });
+    paper.addEventListener('pointercancel',()=>{
+      drag=null;paper.style.zIndex='';paper.style.opacity='';clearSnapPreview();
+    });
+    rack.append(paper);
+  }
+}
+// A story is a clean experiment each time it is opened.  This resets
+// mathematical parameters, the Cut/Clay state and saved pieces ONLY when
+// navigating to a different story; toggling Cut/Clay within a story retains
+// its current experiment and its colourful paper specimens.
+function resetGadgetsForNewStory(){
+  center=0; half=.89; arcDrag=null;
+  Object.assign(annBlob,{kind:'amoeba',x:314,y:146,r:82,sx:1.16,sy:.98,rotation:0,p1:1.0,p2:-.3,p3:.6});
+  annulusOutline='';
+  Object.assign(productModels.Square,{s:.49,t:.58,rs:.22,rt:.22});
+  Object.assign(productModels.Torus,{s:.025,t:.035,rs:.16,rt:.20});
+  for(const key of Object.keys(cabinets))cabinets[key].length=0;
+  inkQueue[4]=[]; inkQueue[6]=[];
+  artMode=false;selectedArtInk=0;
+  torusFreshCutId=null;
+  unionMode=false;
+  serial=0;
+  clearSnapPreview();
+  renderQuotient();
+  renderAnnulus();
+  paintAnnulusSaved();
+  renderProduct('Square');
+  renderProduct('Torus');
+}
+
+function controlsRefresh(){
+  const productActive=page>=4;
+  const collectible=(page===2)||productActive;
+  if(page<4) unionMode=false;
+  $('berryRail').hidden=!collectible;
+  $('berryRail').classList.toggle('stamp-tool',page===2);
+  $('keepBerry').setAttribute('aria-label',page===2?'Stamp current open set onto the annulus':'Save basis open set');
+  $('keepBerry').title=page===2?'Stamp onto annulus':'Save';
+  $('keepBerry').classList.toggle('select',collectible&&!unionMode);
+  $('unionBerry').classList.toggle('select',productActive&&unionMode);
+  $('unionBerry').hidden=!productActive || page===2;
+  $('unionBerry').setAttribute('aria-pressed',String(productActive&&unionMode));
+  document.body.classList.toggle('assembly',productActive&&unionMode);
+  const blob=pageForShape[page],hasShape=!!blob;
+  $('shapePicker').classList.toggle('visible',hasShape);
+  refreshArtMode();
+  $('unionBerry').style.opacity=productActive?'1':'.55';
+  $('keepBerry').style.opacity=collectible?(unionMode?'.32':'.82'):'.82';
+  $('keepBerry').setAttribute('aria-disabled', String(productActive&&unionMode));
+  for(const el of document.querySelectorAll('.shape-pick'))el.classList.toggle('active',hasShape&&el.dataset.shape===(blob.kind||'amoeba'));
+  if(page===6)rackRefresh();else $('specimenRack').replaceChildren();
+}
+function saveCurrent(){
+  let value=null;
+  if(pageForShape[page])value=deepCopy(pageForShape[page]);
+  else if(page===4)value=deepCopy(productModels.Square);
+  else if(page===6)value=deepCopy(productModels.Torus);
+  if(!value)return;
+  // The tint belongs to the saved specimen, not to its position on screen.
+  const colorIndex=page===2 ? selectedCabinet().length : (page===4||page===6)?nextPaperInk(page):selectedCabinet().length;
+  if(page===2){
+    selectedCabinet().push({id:++serial,page,value,placed:true,colorIndex,
+      inkHex:artMode?artInkColors[selectedArtInk]:null});
+    paintAnnulusSaved();
+    syncAnnulusPreviewInk(); // AUTO advances to the next ink after saving.
+    return;
+  }
+  if(page===4){
+    const item={id:++serial,page,value,placed:true,colorIndex,boardDX:0,boardDY:0};
+    selectedCabinet().push(item);
+    renderProduct('Square');
+    return;
+  }
+  if(page===6){
+    const item={id:++serial,page,value,placed:true,colorIndex,boardDX:0,boardDY:0};
+    selectedCabinet().push(item);
+    torusFreshCutId=item.id;
+    renderProduct('Torus'); // painted here, no floating paper or rack movement
+    return;
+  }
+  const target=page===4?$('prodSquareObject'):$('prodTorusAtlas');
+  const bounds=target.getBoundingClientRect(),matrix=target.getScreenCTM();
+  const paperScale=Math.hypot(matrix.a,matrix.b);
+  const item={id:++serial,page,value,placed:false,colorIndex,paperScale};
+  const shape=cutoutGeometry(item);
+  item.paperX=Math.max(12,Math.min(window.innerWidth-shape.w*paperScale-12,bounds.left+24+(colorIndex%4)*48));
+  item.paperY=Math.max(12,Math.min(window.innerHeight-shape.h*paperScale-90,bounds.bottom+12+Math.floor(colorIndex/4)*24));
+  selectedCabinet().push(item);
+  rackRefresh();
+}
+$('keepBerry').addEventListener('click',()=>{
+  if((page!==2 && page<4)||unionMode)return;
+  saveCurrent();
+});
+$('unionBerry').addEventListener('click',()=>{
+  if(page<4)return;
+  if(!unionMode)chooseClayFor(page); // entering the hands-on clay mode
+  if(page===6)torusFreshCutId=null;
+  unionMode=!unionMode;
+  controlsRefresh();paintAllUnions();
+});
+for(const el of document.querySelectorAll('.shape-pick'))el.addEventListener('click',()=>{
+  const b=pageForShape[page];if(!b)return;
+  b.kind=el.dataset.shape;
+  if(page===2)renderAnnulus();
+  controlsRefresh();
+});
+function renderProductAtlas(name){
+  const o=productModels[name], is=productIntervals(o.s,o.rs,o.cyclicS),
+    it=productIntervals(o.t,o.rt,o.cyclicT);
+  const u=$('prod'+name+'StripsU'),v=$('prod'+name+'StripsV'),rr=$('prod'+name+'Rectangles');
+  const uf=$('prod'+name+'FactorU'),vf=$('prod'+name+'FactorV');
+  for(const g of [u,v,rr,uf,vf])g.replaceChildren();
+  // Third gadget only: the ENTIRE bar can receive wheel scaling, even when
+  // the pointer is not on the selected interval. These regions have no drag
+  // role, so dragging empty sections cannot change the selected U or V.
+  if(name==='Square'){
+    uf.append(svgElement('line',{
+      x1:PR.x,y1:348,x2:PR.x+PR.size,y2:348,
+      'data-wheel-axis':'s',
+      style:'stroke:transparent;stroke-width:25;pointer-events:stroke;cursor:ns-resize'
+    }));
+    vf.append(svgElement('line',{
+      x1:79,y1:PR.y,x2:79,y2:PR.y+PR.size,
+      'data-wheel-axis':'t',
+      style:'stroke:transparent;stroke-width:25;pointer-events:stroke;cursor:ew-resize'
+    }));
+  }
+  const squareClayGuides=unionMode && name==='Square';
+  const squareMode=name==='Square';
+  const uFill=squareMode ? (squareClayGuides ? '#f3ead2' : '#EFCBB9') : '#dfa85f';
+  const vFill=squareMode ? (squareClayGuides ? '#f3ead2' : '#DDD0E7') : '#813e2e';
+  const helperOpacity=squareClayGuides ? .16 : (squareMode ? .58 : 1);
+  const lineOpacity=squareClayGuides ? .3 : 1;
+  const uStroke=squareMode ? '#D79B7D' : '#fff0d2';
+  const vStroke=squareMode ? '#B7A7C9' : '#fff0d2';
+  const rectFill=squareMode ? '#F7EAD8' : '#fff0d2';
+  // The highlighted bars are the *only* draggable chart controls.
+  // Pointer events on the visual strokes are disabled; transparent hit
+  // strokes and endpoint disks are placed over them for deliberate drags.
+  for(const [a,b] of is){
+    appendRect(u,AX(a),PR.y,PR.size*(b-a),PR.size,uFill,helperOpacity);
+    uf.append(svgElement('line',{x1:AX(a),y1:348,x2:AX(b),y2:348,
+      stroke:uStroke,'stroke-opacity':lineOpacity,'stroke-width':10,
+      'stroke-linecap':'round','pointer-events':'none'}));
+    uf.append(svgElement('line',{x1:AX(a),y1:348,x2:AX(b),y2:348,
+      stroke:'transparent','stroke-width':22,'pointer-events':'stroke',
+      'data-product-role':'move','data-axis':'s',style:'cursor:grab;touch-action:none'}));
+  }
+  for(const [c,d] of it){
+    appendRect(v,PR.x,AY(d),PR.size,PR.size*(d-c),vFill,helperOpacity);
+    vf.append(svgElement('line',{x1:79,y1:AY(c),x2:79,y2:AY(d),
+      stroke:vStroke,'stroke-opacity':lineOpacity,'stroke-width':10,
+      'stroke-linecap':'round','pointer-events':'none'}));
+    vf.append(svgElement('line',{x1:79,y1:AY(c),x2:79,y2:AY(d),
+      stroke:'transparent','stroke-width':22,'pointer-events':'stroke',
+      'data-product-role':'move','data-axis':'t',style:'cursor:grab;touch-action:none'}));
+  }
+  // An endpoint belongs to the mathematical interval, not to the empty bar.
+  // Always insert endpoint hits last so they win over the segment hit areas.
+  for(const [which,g,cyclic,base,dir,center,radius] of [
+    ['s',uf,o.cyclicS,348,'horizontal',o.s,o.rs],
+    ['t',vf,o.cyclicT,79,'vertical',o.t,o.rt]]){
+    for(const side of ['start','end']){
+      let t=center+(side==='start'?-radius:radius);
+      t=cyclic?((t%1)+1)%1:clamp(t,0,1);
+      const x=dir==='horizontal'?AX(t):base;
+      const y=dir==='horizontal'?base:AY(t);
+      g.append(svgElement('circle',{cx:x,cy:y,r:14,fill:'transparent',
+        'pointer-events':'all','data-product-role':'endpoint','data-axis':which,
+        'data-side':side,style:'cursor:ew-resize;touch-action:none'}));
+    }
+  }
+  for(const [a,b] of is)for(const [c,d] of it){
+    // The visible cream U × V is itself a direct-manipulation handle.
+    // Its interior translates both selected factor intervals together,
+    // but only in Basis mode; the clay workspace remains separate.
+    const basisRect=svgElement('rect',{
+      x:AX(a),y:AY(d),width:PR.size*(b-a),height:PR.size*(d-c),
+      fill:rectFill,'fill-opacity':squareClayGuides ? .14 : 1
+    });
+    if(name==='Square' && !unionMode){
+      basisRect.setAttribute('data-product-role','move-rectangle');
+      basisRect.setAttribute('style','cursor:grab;touch-action:none;pointer-events:visiblePainted');
+    }else{
+      basisRect.setAttribute('pointer-events','none');
+    }
+    rr.append(basisRect);
+  }
+  paintProductUnion(name);
+}
+function makeQuad(a,b,c,d,color){
+  const attrs={d:`M${a[0].toFixed(2)} ${a[1].toFixed(2)}L${b[0].toFixed(2)} ${b[1].toFixed(2)}L${c[0].toFixed(2)} ${c[1].toFixed(2)}L${d[0].toFixed(2)} ${d[1].toFixed(2)}Z`, fill:color,stroke:color,'stroke-width':.48,'stroke-linejoin':'round'};
+  return svgElement('path',attrs);
+}
+function renderProductSquare(o,g){
+  appendRect(g,92,44,296,296,unionMode?chosenClay[4]:'#A77967',1);
+  if(!unionMode){
+    const selected=[{value:o,colorIndex:0}];
+    for(const item of selected){
+      const piece=svgElement('g',{});g.append(piece);
+      const q=item.value, swatch={hex:'#F7EAD8',opacity:1};
+      const is=productIntervals(q.s,q.rs,false),it=productIntervals(q.t,q.rt,false);
+      for(const [a,b] of is)for(const [c,d] of it)
+        appendRect(piece,92+296*a,44+296*(1-d),296*(b-a),296*(d-c),swatch.hex,swatch.opacity);
+    }
+    for(const item of placedCabinet(4)){
+      const piece=svgElement('g',{});g.append(piece);
+      const q=item.value, is=productIntervals(q.s,q.rs,false),it=productIntervals(q.t,q.rt,false);
+      for(const [a,b] of is)for(const [c,d] of it)
+        piece.append(svgElement('rect',{x:92+296*a,y:44+296*(1-d),width:296*(b-a),height:296*(d-c),class:'memory-trace'}));
+    }
+  }else{
+    for(const item of placedCabinet(4)){
+      const piece=svgElement('g',{});g.append(piece);
+      const q=item.value, swatch=savedPaperInk(item);
+      const is=productIntervals(q.s,q.rs,false),it=productIntervals(q.t,q.rt,false);
+      for(const [a,b] of is)for(const [c,d] of it)
+        appendRect(piece,92+296*a,44+296*(1-d),296*(b-a),296*(d-c),swatch.hex,swatch.opacity);
+    }
+  }
+}
+function cylinderPoint(s,t){
+  const a=2*Math.PI*s,front=Math.cos(a),height=200;
+  return [240+120*Math.sin(a), 81+(1-t)*height+28*front,front];
+}
+function torusPoint(s,t){
+  const a=2*Math.PI*s,b=2*Math.PI*t,R=106,r=44;
+  const x=(R+r*Math.cos(b))*Math.cos(a), y=(R+r*Math.cos(b))*Math.sin(a),z=r*Math.sin(b);
+  // oblique orthographic projection and painter depth
+  return [240+x*.97,192-y*.43-z*.88, y*.89-z*.25];
+}
+function renderSurface(name,o,g){
+  const cyl=name==='Cylinder',ns=cyl?90:96,nt=cyl?32:44;
+  const point=cyl?cylinderPoint:torusPoint;
+  const quads=[];
+  for(let i=0;i<ns;i++)for(let j=0;j<nt;j++){
+    const a=i/ns,b=(i+1)/ns,c=j/nt,d=(j+1)/nt;
+    const P=[point(a,c),point(b,c),point(b,d),point(a,d)];
+    const midS=(a+b)/2,midT=(c+d)/2;
+    const selected=(unionMode?placedCabinet(pageForProduct[name]).map(z=>z.value):[o]).some(q=>productMember(midS,q.s,q.rs,o.cyclicS)&&productMember(midT,q.t,q.rt,o.cyclicT));
+    // depth variation darkens away from the viewer, but membership is computed in factor coordinates.
+    const depth=P.reduce((k,q)=>k+q[2],0)/4;
+    const tnorm=cyl?(depth+1)/2:(depth+150)/300;
+    const underlying=tnorm>.55?'#b78632':'#946b2e';
+    const color=selected?'#8296c1':underlying;
+    quads.push({P,depth,color});
+  }
+  quads.sort((a,b)=>a.depth-b.depth);
+  const fragment=document.createDocumentFragment();
+  for(const q of quads)fragment.append(makeQuad(...q.P,q.color));
+  g.append(fragment);
+  if(cyl){
+    for(const t of [0,1]){
+      let d='';
+      for(let i=0;i<=160;i++){
+        const p=point(i/160,t);
+        d+=(i?'L':'M')+p[0].toFixed(2)+' '+p[1].toFixed(2);
+      }
+      g.append(svgElement('path',{d,fill:'none',stroke:'#805d31','stroke-width':2.3,opacity:.8,'pointer-events':'none'}));
+    }
+  }
+}
+function torusFactorCenters(){
+  // Desktop: one complete S^1 above the other, maintaining the original
+  // 79-unit radius. Narrow screens retain the original horizontal layout.
+  return window.matchMedia('(min-width:861px)').matches
+    ?{s:{x:110,y:111,r:79},t:{x:110,y:340,r:79}}
+    :{s:{x:145,y:192,r:79},t:{x:335,y:192,r:79}};
+}
+function syncTorusFactorFrames(){
+  const svg=$('prodTorusFactors'),C=torusFactorCenters();
+  const wide=window.matchMedia('(min-width:861px)').matches;
+  const view=wide?'0 0 220 450':'55 40 370 320';
+  if(svg.getAttribute('viewBox')!==view)svg.setAttribute('viewBox',view);
+  const circles=svg.querySelectorAll('circle.factor-circle');
+  const dots=svg.querySelectorAll('circle.factor-dot');
+  for(const [i,k] of ['s','t'].entries()){
+    if(circles[i]){
+      circles[i].setAttribute('cx',C[k].x);
+      circles[i].setAttribute('cy',C[k].y);
+    }
+    if(dots[i]){
+      dots[i].setAttribute('cx',C[k].x);
+      dots[i].setAttribute('cy',C[k].y-C[k].r);
+    }
+  }
+}
+function renderTorusFactors(o){
+  syncTorusFactorFrames();
+  const C=torusFactorCenters();
+  drawFactorCircleArcs($('torusFactorArcsU'),C.s.x,C.s.y,C.s.r,productIntervals(o.s,o.rs,true),'factor-arc-u','s');
+  drawFactorCircleArcs($('torusFactorArcsV'),C.t.x,C.t.y,C.t.r,productIntervals(o.t,o.rt,true),'factor-arc-v','t');
+  drawFactorHandles($('torusFactorHandlesU'),C.s.x,C.s.y,C.s.r,o.s,o.rs,'s');
+  drawFactorHandles($('torusFactorHandlesV'),C.t.x,C.t.y,C.t.r,o.t,o.rt,'t');
+}
+function renderTorusContours(o){
+  const g=$('prodTorusContours'); if(!g) return; g.replaceChildren();
+  // Hand-drawn contour language while keeping the seam mathematically aligned with s = 0 ~ 1.
+  g.append(svgElement('path',{d:sketchCurve('s',0,.95,320,.07), class:'torus-seam'}));
+  g.append(svgElement('path',{d:sketchCurve('s',0,.45,320,.19), class:'torus-sketched-soft', opacity:.55}));
+  g.append(svgElement('path',{d:sketchCurve('t',0.77,.85,320,.33), class:'torus-sketched'}));
+  g.append(svgElement('path',{d:sketchCurve('t',0.30,.65,320,.58), class:'torus-sketched-soft'}));
+  g.append(svgElement('path',{d:sketchCurve('t',0.06,.55,320,.82), class:'torus-sketched-soft', opacity:.62}));
+  g.append(svgElement('path',{d:sketchCurve('s',o.s,.55,240,.44), class:'torus-contour-soft', opacity:.68}));
+  g.append(svgElement('path',{d:sketchCurve('t',o.t,.50,240,.61), class:'torus-contour-soft', opacity:.68}));
+}
+function renderProduct(name){
+  renderProductAtlas(name);
+  if(name==='Torus'){
+    renderTorusFactors(productModels[name]);
+    return;
+  }
+  const g=$('prod'+name+'ObjectMesh');
+  if(!g) return;
+  g.replaceChildren();
+  if(name==='Square')renderProductSquare(productModels[name],g);
+  else renderSurface(name,productModels[name],g);
+}
+// Dragging is initiated exclusively on the selected arc / endpoint.
+// Moving through empty space, the unselected circle, or the square does nothing.
+const productMinWidth=.055;
+function updateIntervalEnd(o,axis,side,value){
+  const centerKey=axis, radiusKey=axis==='s'?'rs':'rt';
+  const center=o[centerKey],radius=o[radiusKey];
+  const cyclic=axis==='s'?o.cyclicS:o.cyclicT;
+  if(cyclic){
+    const fixed=side==='start'?center+radius:center-radius;
+    const oldMoving=center+(side==='start'?-radius:radius);
+    const proposed=unwrapNear(value,oldMoving);
+    const width=Math.max(productMinWidth,Math.min(.94,
+      side==='start'?fixed-proposed:proposed-fixed));
+    const a=side==='start'?fixed-width:fixed;
+    const b=side==='start'?fixed:fixed+width;
+    o[centerKey]=((a+b)/2%1+1)%1;
+    o[radiusKey]=(b-a)/2;
+  }else{
+    const left=clamp(center-radius,0,1),right=clamp(center+radius,0,1);
+    const a=side==='start'?clamp(value,0,right-productMinWidth):left;
+    const b=side==='end'?clamp(value,left+productMinWidth,1):right;
+    o[centerKey]=(a+b)/2;
+    o[radiusKey]=(b-a)/2;
+  }
+}
+function shiftInterval(o,axis,newCenter){
+  const radius=axis==='s'?o.rs:o.rt;
+  const cyclic=axis==='s'?o.cyclicS:o.cyclicT;
+  o[axis]=cyclic?((newCenter%1)+1)%1:clamp(newCenter,radius,1-radius);
+}
+// Page IV: the two circle factors. A pointerdown on an actual endpoint
+// adjusts it; a pointerdown on the selected arc translates that arc.
+(function(){
+  const svg=$('prodTorusFactors'),o=productModels.Torus;
+  let drag=null;
+  svg.addEventListener('pointerdown',e=>{
+    if(unionMode||page!==6||e.pointerType==='mouse'&&e.button!==0)return;
+    const hit=e.target.closest('[data-factor-role]');
+    if(!hit||!svg.contains(hit))return;
+    const axis=hit.dataset.which,kind=hit.dataset.factorRole;
+    if(axis!=='s'&&axis!=='t')return;
+    const p=point(e,svg),c=torusFactorCenters()[axis];
+    torusFreshCutId=null;renderProduct('Torus');
+    drag={id:e.pointerId,axis,kind,side:hit.dataset.side,
+      startParam:nearestOnFactorCircle(p,c.x,c.y),startCenter:o[axis]};
+    svg.setPointerCapture(e.pointerId);
+    e.preventDefault();e.stopPropagation();
+  });
+  svg.addEventListener('pointermove',e=>{
+    if(!drag||e.pointerId!==drag.id||!(e.buttons&1)&&e.pointerType==='mouse')return;
+    const p=point(e,svg),c=torusFactorCenters()[drag.axis];
+    const next=nearestOnFactorCircle(p,c.x,c.y);
+    if(drag.kind==='endpoint')updateIntervalEnd(o,drag.axis,drag.side,next);
+    else shiftInterval(o,drag.axis,drag.startCenter+unwrapNear(next,drag.startParam)-drag.startParam);
+    renderProduct('Torus');
+    e.stopPropagation();
+  });
+  function end(e){if(drag&&e.pointerId===drag.id)drag=null;}
+  svg.addEventListener('pointerup',end);
+  svg.addEventListener('pointercancel',end);
+  svg.addEventListener('lostpointercapture',end);
+  // Scrolling sizes a circle interval only when over its selected arc.
+  svg.addEventListener('wheel',e=>{
+    if(unionMode||page!==6)return;
+    const hit=e.target.closest('[data-factor-role]');
+    if(!hit||!svg.contains(hit))return;
+    e.preventDefault();
+    const axis=hit.dataset.which,rKey=axis==='s'?'rs':'rt';
+    torusFreshCutId=null;
+    o[rKey]=clamp(o[rKey]*wheelRatio(e),.035,.47);
+    renderProduct('Torus');
+  },{passive:false});
+})();
+
+// Page III (and the torus coordinate chart): only the *selected factor
+// intervals* can be dragged. Empty parts of the chart are never controls.
+for(const name of Object.keys(productModels)){
+  const svg=$('prod'+name+'Atlas'),o=productModels[name];
+  const activePage=pageForProduct[name];
+  let drag=null;
+  const toParam=(axis,p)=>axis==='s'
+    ?clamp((p.x-PR.x)/PR.size,0,1)
+    :clamp(1-(p.y-PR.y)/PR.size,0,1);
+  svg.addEventListener('pointerdown',e=>{
+    if(unionMode||page!==activePage||e.pointerType==='mouse'&&e.button!==0)return;
+    const hit=e.target.closest('[data-product-role]');
+    if(!hit||!svg.contains(hit))return;
+    const axis=hit.dataset.axis,kind=hit.dataset.productRole;
+    if(kind!=='move-rectangle' && axis!=='s'&&axis!=='t')return;
+    if(kind==='move-rectangle' && name!=='Square')return;
+    const p=point(e,svg);
+    if(name==='Torus'){torusFreshCutId=null;renderProduct('Torus');}
+    drag=kind==='move-rectangle'
+      ?{id:e.pointerId,kind,startX:p.x,startY:p.y,startS:o.s,startT:o.t}
+      :{id:e.pointerId,axis,kind,side:hit.dataset.side,
+        startParam:toParam(axis,p),startCenter:o[axis]};
+    svg.setPointerCapture(e.pointerId);
+    e.preventDefault();e.stopPropagation();
+  });
+  svg.addEventListener('pointermove',e=>{
+    if(!drag||e.pointerId!==drag.id||!(e.buttons&1)&&e.pointerType==='mouse')return;
+    const p=point(e,svg);
+    if(drag.kind==='move-rectangle'){
+      // Shift the *chosen basis element* in both factors, not its size.
+      // Keeping the initial grab offset prevents jumping on pointerdown.
+      shiftInterval(o,'s',drag.startS+(p.x-drag.startX)/PR.size);
+      shiftInterval(o,'t',drag.startT-(p.y-drag.startY)/PR.size);
+    }else{
+      const next=toParam(drag.axis,p);
+      if(drag.kind==='endpoint')updateIntervalEnd(o,drag.axis,drag.side,next);
+      else shiftInterval(o,drag.axis,drag.startCenter+next-drag.startParam);
+    }
+    renderProduct(name);
+    e.stopPropagation();
+  });
+  function end(e){if(drag&&e.pointerId===drag.id)drag=null;}
+  svg.addEventListener('pointerup',end);
+  svg.addEventListener('pointercancel',end);
+  svg.addEventListener('lostpointercapture',end);
+  // Third page: wheel scaling works anywhere on either whole bar. On the
+  // torus chart, preserve the existing selected-interval wheel behavior.
+  // A wheel event never begins a drag or relocates the selected neighborhood.
+  svg.addEventListener('wheel',e=>{
+    if(unionMode||page!==activePage)return;
+    const selector=name==='Square'
+      ?'[data-product-role], [data-wheel-axis]'
+      :'[data-product-role]';
+    const hit=e.target.closest(selector);
+    if(!hit||!svg.contains(hit))return;
+    // Page III: wheel over the cream U×V changes *both* interval radii,
+    // keeping its center fixed. Bar scrolling still changes one factor only.
+    if(name==='Square'&&hit.dataset.productRole==='move-rectangle'){
+      e.preventDefault();
+      const ratio=wheelRatio(e);
+      o.rs=clamp(o.rs*ratio,.035,.47);
+      o.rt=clamp(o.rt*ratio,.035,.47);
+      renderProduct(name);
+      return;
+    }
+    const axis=hit.dataset.axis||hit.dataset.wheelAxis;
+    if(axis!=='s'&&axis!=='t')return;
+    e.preventDefault();
+    const rKey=axis==='s'?'rs':'rt';
+    if(name==='Torus')torusFreshCutId=null;
+    o[rKey]=clamp(o[rKey]*wheelRatio(e),.035,.47);
+    renderProduct(name);
+  },{passive:false});
+  // No generic wheel handler on the left square: a workbench isn't a slider.
+  renderProduct(name);
+}
+window.addEventListener('resize',()=>renderTorusFactors(productModels.Torus));
+// All palette and specimen collections are initialized before first render.
+renderQuotient(); renderAnnulus(); paintAnnulusSaved();
+flip(0);
+controlsRefresh();
+paintAllUnions();
+
+})();
+</script>
+</body>
+</html>
