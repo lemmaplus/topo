@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#f7f5ee">
-<title>Pottery Lottery</title>
+<title>◯</title>
 <style>
 :root{
   --wall:#f7f5ee;
@@ -860,7 +860,84 @@ body:not(.subspace-clay) #annulusAmbientMemories{display:none!important}
   .page-diamond:focus-visible{outline:1.5px solid #6e564d;outline-offset:3px}
 }
 
+
+/* iPhone landscape interlude: driven by device + orientation, not pointer media queries.
+   iPad screen widths (including split view) are excluded by the device's short side. */
+.pottery-lottery-interlude{display:none}
+html.phone-landscape-interlude{height:100%;overflow:hidden}
+html.phone-landscape-interlude body{overflow:hidden!important;overscroll-behavior:none}
+html.phone-landscape-interlude .sheet,
+html.phone-landscape-interlude .page-diamonds,
+html.phone-landscape-interlude .shape-picker,
+html.phone-landscape-interlude .berry-rail,
+html.phone-landscape-interlude .specimen-rack{
+  visibility:hidden!important;pointer-events:none!important;
+}
+html.phone-landscape-interlude .pottery-lottery-interlude{
+  position:fixed;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  padding:16px max(24px,env(safe-area-inset-right)) 16px max(24px,env(safe-area-inset-left));
+  background:var(--wall);color:#805b50;z-index:500;
+  user-select:none;-webkit-user-select:none;pointer-events:auto;
+}
+html.phone-landscape-interlude .pottery-lottery-interlude span{
+  font-family:Georgia,'Times New Roman',serif;
+  font-size:clamp(28px,5.1vw,48px);font-weight:400;
+  line-height:1;letter-spacing:.015em;white-space:nowrap;text-align:center;
+}
+
+
+/* Fourth story, stacked layout: the divider belongs to the actual grid gap.
+   Formerly it used top:50%, which was wrong when the two mathematical
+   windows acquired unequal intrinsic row heights (notably iPad portrait).
+   Use a real grid track for the line, not an absolute percentage overlay.
+   Equal total gap: 4.25 + 1.5 + 4.25 = the previous 10px. */
+@media (orientation:portrait) and (max-width:860px){
+  .story-panel[data-story="3"] #prodTorusExhibit .torus-pair{
+    grid-template-columns:minmax(0,1fr);
+    grid-template-rows:minmax(0,auto) 1.5px minmax(0,auto);
+    row-gap:4.25px;
+  }
+  .story-panel[data-story="3"] #prodTorusExhibit .torus-pair > .space:first-child{
+    grid-row:1;grid-column:1;
+  }
+  .story-panel[data-story="3"] #prodTorusExhibit .torus-pair > .space:last-child{
+    grid-row:3;grid-column:1;
+  }
+  .story-panel[data-story="3"] #prodTorusExhibit .torus-pair::after{
+    content:"";position:relative;
+    grid-row:2;grid-column:1;
+    align-self:center;justify-self:stretch;
+    left:auto;right:auto;top:auto;bottom:auto;
+    width:auto;height:1.5px;margin:0 10px;
+    transform:none;background:#fff6e7;opacity:.97;
+    pointer-events:none;
+  }
+}
+
 </style>
+<script>
+/* Keep the interlude tied to the physical phone, not media-query pointer type:
+   Safari and embedded iOS previews can report hover/pointer capabilities differently.
+   In particular, a resized iPad window must retain the mathematical workbench. */
+(function(){
+  function updatePhoneLandscape(){
+    const ua=navigator.userAgent||'';
+    const shortSide=Math.min(screen.width||Infinity,screen.height||Infinity);
+    const isPhone=/iPhone|iPod/i.test(ua) ||
+      (shortSide<=600 && (navigator.maxTouchPoints>0 || matchMedia('(pointer:coarse)').matches));
+    const viewportLandscape=innerWidth>innerHeight*1.08;
+    const orientationLandscape=(typeof window.orientation==='number' && Math.abs(window.orientation)===90) ||
+      (screen.orientation && /^landscape/.test(screen.orientation.type));
+    document.documentElement.classList.toggle('phone-landscape-interlude',
+      !!(isPhone && (viewportLandscape || orientationLandscape)));
+  }
+  updatePhoneLandscape();
+  addEventListener('resize',updatePhoneLandscape,{passive:true});
+  addEventListener('orientationchange',updatePhoneLandscape,{passive:true});
+  if(window.visualViewport)window.visualViewport.addEventListener('resize',updatePhoneLandscape,{passive:true});
+})();
+</script>
 </head>
 <body>
 <main class="sheet" aria-label="Topology Observatory — horizontal mathematical picture scroll">
@@ -987,6 +1064,7 @@ body:not(.subspace-clay) #annulusAmbientMemories{display:none!important}
 </div>
 </div>
 </main>
+<div class="pottery-lottery-interlude" aria-label="Pottery Lottery"><span>Pottery Lottery</span></div>
 <nav class="page-diamonds" aria-label="Mobile story navigation">
   <button id="previousDiamond" class="page-diamond previous" type="button" aria-label="Previous story" title="Previous story"><span class="diamond-inside" aria-hidden="true"></span></button>
   <button id="nextDiamond" class="page-diamond following" type="button" aria-label="Next story" title="Next story"><span class="diamond-inside" aria-hidden="true"></span></button>
@@ -1501,47 +1579,119 @@ function attachBlobInteraction(svg, blob, render, hitId){
   svg.addEventListener('wheel',e=>{e.preventDefault(); if(blob===annBlob&&subClayMode&&e.shiftKey){blob.rotation=(blob.rotation||0)-Math.sign(e.deltaY)*5;}else blob.r=clamp(blob.r*wheelRatio(e),22,320); render();},{passive:false});
 }
 // Page 1: circle as subspace
-// Page 2: quotient circle and interval preimage
-const quot=$('quotCircle'); let center=0, half=.89, arcDrag=null;
+// Page 2: quotient circle and interval preimage.
+// The selected open arc can run a LITTLE MORE than one full turn.
+// The extra length is a genuine interaction buffer, not a forced slit or a
+// separate mode: once its angular span reaches 2π, the open set is all S^1.
+const quot=$('quotCircle');
+let center=0, half=.89, arcDrag=null;
+const QUOT_MIN_HALF=.19, QUOT_OVERLAP_HALF=.22, QUOT_MAX_HALF=PI+QUOT_OVERLAP_HALF;
 function delta(a,b){return Math.atan2(Math.sin(a-b),Math.cos(a-b));}
 function norm01(a){let t=a/TAU; t%=1; if(t<0)t+=1; return t;}
 function xAt(t){return 28+424*t;}
-function intervalSegments(center,half){ let lo=norm01(center-half), hi=norm01(center+half); return lo<=hi?[[lo,hi]]:[[0,hi],[lo,1]]; }
+function quotientIsFull(){return half>=PI-1e-8;}
+function setQuotientHalf(v){half=clamp(v,QUOT_MIN_HALF,QUOT_MAX_HALF);}
+function arcPolyPath(from,to,N=100){
+  let p='';
+  for(let i=0;i<=N;i++){
+    const a=from+(to-from)*i/N, pt=circlePoint(S,S.r,a);
+    p+=(i?'L':'M')+pt.x.toFixed(3)+' '+pt.y.toFixed(3)+' ';
+  }
+  return p;
+}
+function intervalSegments(center,half){
+  if(half>=PI-1e-8)return [[0,1]];
+  const lo=norm01(center-half), hi=norm01(center+half);
+  return lo<=hi?[[lo,hi]]:[[0,hi],[lo,1]];
+}
 function renderQuotient(){
-  const p=(()=>{let out=''; const N=200; for(let i=0;i<=N;i++){const a=center-half+2*half*i/N; const pt=circlePoint(S,S.r,a); out+=(i?'L':'M')+pt.x.toFixed(2)+' '+pt.y.toFixed(2)+' ';} return out;})();
+  let p;
+  if(quotientIsFull()){
+    // Two SVG semicircles ensure there is NO rasterization slit at the seam.
+    const x0=S.x+S.r, x1=S.x-S.r, y=S.y, r=S.r;
+    p=`M${x0} ${y} A${r} ${r} 0 1 0 ${x1} ${y} A${r} ${r} 0 1 0 ${x0} ${y} Z`;
+  }else{
+    p=arcPolyPath(center-half,center+half,200);
+  }
   ['quotSelected','quotHitPath'].forEach(id=>$(id).setAttribute('d',p));
-  const g=$('intervalHighlights'); g.replaceChildren();
-  const segs=intervalSegments(center,half);
-  for(const [lo,hi] of segs){
-    if(hi-lo<1e-6) continue;
-    const coords={x1:xAt(lo), y1:183, x2:xAt(hi), y2:183, 'stroke-linecap':'round'};
-    g.append(svgElement('line',{...coords,stroke:'#c4b58a','stroke-width':10.5}));
-
+  // Past one revolution, the overlap is a quiet interaction buffer:
+  // render the same complete circle with no extra white stroke or badge.
+  const overlap=Math.max(0,2*(half-PI));
+  quot.dataset.arcSpan=(2*half).toFixed(4);
+  quot.dataset.arcState=quotientIsFull()?(overlap>0?'overlapping':'full'):'partial';
+  quot.setAttribute('aria-label',quotientIsFull()
+    ?'Whole quotient circle selected, with a draggable overlap buffer'
+    :'Circle with selected open arc');
+  const g=$('intervalHighlights');g.replaceChildren();
+  for(const [lo,hi] of intervalSegments(center,half)){
+    if(hi-lo<1e-6)continue;
+    g.append(svgElement('line',{
+      x1:xAt(lo),y1:183,x2:xAt(hi),y2:183,
+      'stroke-linecap':'butt',stroke:'#c4b58a','stroke-width':10.5
+    }));
   }
 }
 function hitWhichEnd(p){
-  const a=center-half, b=center+half; const A=circlePoint(S,S.r,a), B=circlePoint(S,S.r,b);
-  const da=Math.hypot(p.x-A.x,p.y-A.y), db=Math.hypot(p.x-B.x,p.y-B.y); const tol=20*480/Math.max(1,quot.getBoundingClientRect().width);
-  if(da<tol && da<=db) return 'a'; if(db<tol) return 'b'; return null;
+  const A=circlePoint(S,S.r,center-half),B=circlePoint(S,S.r,center+half);
+  const da=Math.hypot(p.x-A.x,p.y-A.y), db=Math.hypot(p.x-B.x,p.y-B.y);
+  const tol=20*480/Math.max(1,quot.getBoundingClientRect().width);
+  // At an exact full turn both endpoints meet. Treat the shared spot as
+  // endpoint B; dragging clockwise expands, counterclockwise reopens the gap.
+  if(db<tol&&db<=da)return 'b';
+  if(da<tol)return 'a';
+  return null;
 }
 quot.addEventListener('pointerdown',e=>{
   if(e.pointerType==='mouse'&&e.button!==0)return;
-  const p=point(e,quot), end=hitWhichEnd(p);
-  arcDrag=end?{kind:end,start:Math.atan2(S.y-p.y,p.x-S.x), centerStart:center, halfStart:half}:{kind:'move', start:Math.atan2(S.y-p.y,p.x-S.x), centerStart:center};
-  quot.setPointerCapture(e.pointerId); e.preventDefault();
+  const p=point(e,quot),kind=hitWhichEnd(p)||'move';
+  arcDrag={kind,prevAngle:Math.atan2(S.y-p.y,p.x-S.x),travel:0,
+    centerStart:center,halfStart:half};
+  quot.setPointerCapture(e.pointerId);e.preventDefault();
 });
 quot.addEventListener('pointermove',e=>{
   const p=point(e,quot);
-  if(!arcDrag){quot.style.cursor=hitWhichEnd(p)?'crosshair':'grab'; return;}
+  if(!arcDrag){quot.style.cursor=hitWhichEnd(p)?'crosshair':'grab';return;}
   const a=Math.atan2(S.y-p.y,p.x-S.x);
-  if(arcDrag.kind==='move') center=arcDrag.centerStart + delta(a,arcDrag.start);
-  else if(arcDrag.kind==='a'){ const endA=arcDrag.centerStart-arcDrag.halfStart + delta(a,arcDrag.start); half=clamp(Math.abs(delta(arcDrag.centerStart+arcDrag.halfStart,endA))/2,.19,PI-.18); center=(endA + (arcDrag.centerStart+arcDrag.halfStart))/2; }
-  else { const endB=arcDrag.centerStart+arcDrag.halfStart + delta(a,arcDrag.start); half=clamp(Math.abs(delta(endB,arcDrag.centerStart-arcDrag.halfStart))/2,.19,PI-.18); center=((arcDrag.centerStart-arcDrag.halfStart) + endB)/2; }
+  arcDrag.travel+=delta(a,arcDrag.prevAngle);
+  arcDrag.prevAngle=a;
+  const {kind,centerStart,halfStart,travel}=arcDrag;
+  if(kind==='move'){
+    center=centerStart+travel;
+  }else if(kind==='a'){
+    // Keep B fixed while dragging A. The center follows the selected radius.
+    const fixedB=centerStart+halfStart;
+    setQuotientHalf(halfStart-travel/2);
+    center=fixedB-half;
+  }else{
+    // Keep A fixed while dragging B, even PAST one full revolution.
+    const fixedA=centerStart-halfStart;
+    setQuotientHalf(halfStart+travel/2);
+    center=fixedA+half;
+  }
   renderQuotient();
 });
-function endArcDrag(){arcDrag=null; quot.style.cursor='';}
-quot.addEventListener('pointerup',endArcDrag); quot.addEventListener('pointercancel',endArcDrag); quot.addEventListener('lostpointercapture',endArcDrag);
-for(const svg of [quot,$('intervalDiagram')]) svg.addEventListener('wheel',e=>{e.preventDefault(); half=clamp(half*wheelRatio(e),.19,PI-.18); renderQuotient();},{passive:false});
+function endArcDrag(){arcDrag=null;quot.style.cursor='';}
+quot.addEventListener('pointerup',endArcDrag);
+quot.addEventListener('pointercancel',endArcDrag);
+quot.addEventListener('lostpointercapture',endArcDrag);
+// Wheel anywhere in either coloured quotient window (not just the narrow
+// SVG stroke). This also covers trackpad scrolling on otherwise blank areas.
+// The outer emaki-wheel handler already yields to coloured math windows.
+function quotientWheel(e){
+  if(e.ctrlKey||e.metaKey)return; // keep browser zoom / pinch intact
+  e.preventDefault();e.stopPropagation();
+  const multiplier=e.deltaMode===1?16:e.deltaMode===2?420:1;
+  // Trackpads may report their two-finger gesture on either axis.
+  const raw=Math.abs(e.deltaY)>=Math.abs(e.deltaX)?e.deltaY:e.deltaX;
+  const dy=raw*multiplier;
+  if(!Number.isFinite(dy)||Math.abs(dy)<1e-6)return;
+  const change=clamp(-dy*.0038,-.46,.46);
+  setQuotientHalf(half+change);
+  renderQuotient();
+}
+for(const board of [quot.closest('.space'),$('intervalDiagram').closest('.space')]){
+  board.addEventListener('wheel',quotientWheel,{passive:false});
+}
 
 // Story I: the original subspace demonstration becomes an optional stamp studio.
 // On desktop the original 82-unit neighbourhood nearly kissed the outer annulus.
@@ -1602,8 +1752,21 @@ const productModels={
   Square:{s:.49,t:.58,rs:.22,rt:.22,cyclicS:false,cyclicT:false},
   Torus:{s:0,t:0,rs:.16,rt:.20,cyclicS:true,cyclicT:true}
 };
+// Full factor opens are valid. Once a circular interval reaches one complete
+// turn, keep its extra overlap in the model, but paint the circle only once.
+// In I=[0,1], we may pass the endpoints a little: the drawing is clipped to I.
+const PRODUCT_CYCLIC_MAX_RADIUS=.57;  // 14% of a revolution of overlap total
+const PRODUCT_INTERVAL_MAX_RADIUS=.70; // comfortable overshoot past both ends
+function productRadiusLimit(o,axis){
+  return (axis==='s'?o.cyclicS:o.cyclicT)
+    ?PRODUCT_CYCLIC_MAX_RADIUS:PRODUCT_INTERVAL_MAX_RADIUS;
+}
 function productIntervals(c,r,cyclic){
-  if(!cyclic)return [[clamp(c-r,0,1),clamp(c+r,0,1)]];
+  if(!cyclic){
+    const a=clamp(c-r,0,1),b=clamp(c+r,0,1);
+    return b>a+1e-8?[[a,b]]:[];
+  }
+  if(r>=.5-1e-8)return [[0,1]];
   let intervals=[];
   for(let k=-1;k<=1;k++){
     const a=clamp(c-r+k,0,1),b=clamp(c+r+k,0,1);
@@ -1613,7 +1776,8 @@ function productIntervals(c,r,cyclic){
   return intervals;
 }
 function productMember(x,c,r,cyclic){
-  return cyclic ? Math.abs(((x-c+.5)%1+1)%1-.5)<r : Math.abs(x-c)<r;
+  return cyclic ? (r>=.5 || Math.abs(((x-c+.5)%1+1)%1-.5)<r)
+    : Math.abs(x-c)<r;
 }
 function factorCirclePath(cx,cy,R,a,b){
   const N=Math.max(18,Math.ceil(160*(b-a))); let d='';
@@ -1622,7 +1786,8 @@ function factorCirclePath(cx,cy,R,a,b){
     const x=cx+R*Math.cos(ang), y=cy+R*Math.sin(ang);
     d+=(i?'L':'M')+x.toFixed(2)+' '+y.toFixed(2)+' ';
   }
-  return d;
+  // Close a selected whole circle with a real SVG join (no tiny slit).
+  return b-a>=1-1e-8?d+'Z':d;
 }
 function drawFactorCircleArcs(group, cx, cy, R, intervals, cls, which){
   group.replaceChildren();
@@ -2374,31 +2539,34 @@ function renderProduct(name){
 // Moving through empty space, the unselected circle, or the square does nothing.
 const productMinWidth=.055;
 function updateIntervalEnd(o,axis,side,value){
-  const centerKey=axis, radiusKey=axis==='s'?'rs':'rt';
-  const center=o[centerKey],radius=o[radiusKey];
-  const cyclic=axis==='s'?o.cyclicS:o.cyclicT;
-  if(cyclic){
-    const fixed=side==='start'?center+radius:center-radius;
-    const oldMoving=center+(side==='start'?-radius:radius);
-    const proposed=unwrapNear(value,oldMoving);
-    const width=Math.max(productMinWidth,Math.min(.94,
-      side==='start'?fixed-proposed:proposed-fixed));
-    const a=side==='start'?fixed-width:fixed;
-    const b=side==='start'?fixed:fixed+width;
-    o[centerKey]=((a+b)/2%1+1)%1;
-    o[radiusKey]=(b-a)/2;
-  }else{
-    const left=clamp(center-radius,0,1),right=clamp(center+radius,0,1);
-    const a=side==='start'?clamp(value,0,right-productMinWidth):left;
-    const b=side==='end'?clamp(value,left+productMinWidth,1):right;
-    o[centerKey]=(a+b)/2;
-    o[radiusKey]=(b-a)/2;
-  }
+  // Non-cyclic factor: permit an endpoint to travel a little BEYOND the
+  // square. The selected open remains its intersection with [0,1].
+  const rKey=axis==='s'?'rs':'rt',radius=o[rKey],center=o[axis];
+  const left=center-radius,right=center+radius;
+  const overshoot=.09;
+  const a=side==='start'?clamp(value,-overshoot,right-productMinWidth):left;
+  const b=side==='end'?clamp(value,left+productMinWidth,1+overshoot):right;
+  o[axis]=(a+b)/2;
+  o[rKey]=(b-a)/2;
+}
+function resizeCyclicFromTravel(o,axis,side,startCenter,startRadius,travel){
+  // One endpoint stays fixed in the universal cover R -> S¹. Accumulated
+  // travel (rather than a shortest-angle snapshot) allows crossing the seam
+  // and passing a COMPLETE revolution without snapping back.
+  const rKey=axis==='s'?'rs':'rt';
+  const nextR=clamp(startRadius+(side==='start'?-travel:travel)/2,
+    productMinWidth/2,PRODUCT_CYCLIC_MAX_RADIUS);
+  const fixed=side==='start'?startCenter+startRadius:startCenter-startRadius;
+  o[rKey]=nextR;
+  o[axis]=((fixed+(side==='start'?-nextR:nextR))%1+1)%1;
 }
 function shiftInterval(o,axis,newCenter){
   const radius=axis==='s'?o.rs:o.rt;
   const cyclic=axis==='s'?o.cyclicS:o.cyclicT;
-  o[axis]=cyclic?((newCenter%1)+1)%1:clamp(newCenter,radius,1-radius);
+  // A full interval must not reopen accidentally when translated.
+  o[axis]=cyclic?((newCenter%1)+1)%1
+    : radius>=.5?clamp(newCenter,1-radius,radius)
+    :clamp(newCenter,radius,1-radius);
 }
 // Page IV: the two circle factors. A pointerdown on an actual endpoint
 // adjusts it; a pointerdown on the selected arc translates that arc.
@@ -2414,7 +2582,8 @@ function shiftInterval(o,axis,newCenter){
     const p=point(e,svg),c=torusFactorCenters()[axis];
     torusFreshCutId=null;renderProduct('Torus');
     drag={id:e.pointerId,axis,kind,side:hit.dataset.side,
-      startParam:nearestOnFactorCircle(p,c.x,c.y),startCenter:o[axis]};
+      startParam:nearestOnFactorCircle(p,c.x,c.y),startCenter:o[axis],
+      startRadius:o[axis==='s'?'rs':'rt'],prevParam:nearestOnFactorCircle(p,c.x,c.y),travel:0};
     svg.setPointerCapture(e.pointerId);
     e.preventDefault();e.stopPropagation();
   });
@@ -2422,8 +2591,11 @@ function shiftInterval(o,axis,newCenter){
     if(!drag||e.pointerId!==drag.id||!(e.buttons&1)&&e.pointerType==='mouse')return;
     const p=point(e,svg),c=torusFactorCenters()[drag.axis];
     const next=nearestOnFactorCircle(p,c.x,c.y);
-    if(drag.kind==='endpoint')updateIntervalEnd(o,drag.axis,drag.side,next);
-    else shiftInterval(o,drag.axis,drag.startCenter+unwrapNear(next,drag.startParam)-drag.startParam);
+    drag.travel+=unwrapNear(next,drag.prevParam)-drag.prevParam;
+    drag.prevParam=next;
+    if(drag.kind==='endpoint')
+      resizeCyclicFromTravel(o,drag.axis,drag.side,drag.startCenter,drag.startRadius,drag.travel);
+    else shiftInterval(o,drag.axis,drag.startCenter+drag.travel);
     renderProduct('Torus');
     e.stopPropagation();
   });
@@ -2439,7 +2611,7 @@ function shiftInterval(o,axis,newCenter){
     e.preventDefault();
     const axis=hit.dataset.which,rKey=axis==='s'?'rs':'rt';
     torusFreshCutId=null;
-    o[rKey]=clamp(o[rKey]*wheelRatio(e),.035,.47);
+    o[rKey]=clamp(o[rKey]*wheelRatio(e),.035,PRODUCT_CYCLIC_MAX_RADIUS);
     renderProduct('Torus');
   },{passive:false});
 })();
@@ -2451,8 +2623,8 @@ for(const name of Object.keys(productModels)){
   const activePage=pageForProduct[name];
   let drag=null;
   const toParam=(axis,p)=>axis==='s'
-    ?clamp((p.x-PR.x)/PR.size,0,1)
-    :clamp(1-(p.y-PR.y)/PR.size,0,1);
+    ?(p.x-PR.x)/PR.size
+    :1-(p.y-PR.y)/PR.size;
   svg.addEventListener('pointerdown',e=>{
     if(unionMode||page!==activePage||e.pointerType==='mouse'&&e.button!==0)return;
     const hit=e.target.closest('[data-product-role]');
@@ -2465,7 +2637,8 @@ for(const name of Object.keys(productModels)){
     drag=kind==='move-rectangle'
       ?{id:e.pointerId,kind,startX:p.x,startY:p.y,startS:o.s,startT:o.t}
       :{id:e.pointerId,axis,kind,side:hit.dataset.side,
-        startParam:toParam(axis,p),startCenter:o[axis]};
+        startParam:toParam(axis,p),startCenter:o[axis],
+        startRadius:o[axis==='s'?'rs':'rt'],prevParam:toParam(axis,p),travel:0};
     svg.setPointerCapture(e.pointerId);
     e.preventDefault();e.stopPropagation();
   });
@@ -2479,8 +2652,14 @@ for(const name of Object.keys(productModels)){
       shiftInterval(o,'t',drag.startT-(p.y-drag.startY)/PR.size);
     }else{
       const next=toParam(drag.axis,p);
-      if(drag.kind==='endpoint')updateIntervalEnd(o,drag.axis,drag.side,next);
-      else shiftInterval(o,drag.axis,drag.startCenter+next-drag.startParam);
+      if(drag.kind==='endpoint'){
+        if(name==='Torus'){
+          // The square chart has a cut at 0~1: unwrap small crossings.
+          drag.travel+=unwrapNear(next,drag.prevParam)-drag.prevParam;
+          drag.prevParam=next;
+          resizeCyclicFromTravel(o,drag.axis,drag.side,drag.startCenter,drag.startRadius,drag.travel);
+        }else updateIntervalEnd(o,drag.axis,drag.side,next);
+      }else shiftInterval(o,drag.axis,drag.startCenter+next-drag.startParam);
     }
     renderProduct(name);
     e.stopPropagation();
@@ -2504,8 +2683,8 @@ for(const name of Object.keys(productModels)){
     if(name==='Square'&&hit.dataset.productRole==='move-rectangle'){
       e.preventDefault();
       const ratio=wheelRatio(e);
-      o.rs=clamp(o.rs*ratio,.035,.47);
-      o.rt=clamp(o.rt*ratio,.035,.47);
+      o.rs=clamp(o.rs*ratio,.035,PRODUCT_INTERVAL_MAX_RADIUS);
+      o.rt=clamp(o.rt*ratio,.035,PRODUCT_INTERVAL_MAX_RADIUS);
       renderProduct(name);
       return;
     }
@@ -2514,11 +2693,40 @@ for(const name of Object.keys(productModels)){
     e.preventDefault();
     const rKey=axis==='s'?'rs':'rt';
     if(name==='Torus')torusFreshCutId=null;
-    o[rKey]=clamp(o[rKey]*wheelRatio(e),.035,.47);
+    o[rKey]=clamp(o[rKey]*wheelRatio(e),.035,productRadiusLimit(o,axis));
     renderProduct(name);
   },{passive:false});
-  // No generic wheel handler on the left square: a workbench isn't a slider.
   renderProduct(name);
+}
+// The whole coloured math workbench belongs to its mathematical controls,
+// just as on the quotient page. A selected bar/arc keeps its axis-specific
+// wheel handler; a wheel elsewhere in the workbench expands BOTH factors,
+// except over the torus circle display (which chooses its nearer circle).
+for(const name of ['Square','Torus']){
+  const exhibit=$('prod'+name+'Exhibit');
+  const o=productModels[name], activePage=pageForProduct[name];
+  for(const board of exhibit.querySelectorAll('.space')){
+    board.addEventListener('wheel',e=>{
+      if(e.defaultPrevented||unionMode||page!==activePage||e.ctrlKey||e.metaKey)return;
+      const raw=Math.abs(e.deltaY)>=Math.abs(e.deltaX)?e.deltaY:e.deltaX;
+      if(!Number.isFinite(raw)||Math.abs(raw)<1e-5)return;
+      e.preventDefault();e.stopPropagation();
+      const ratio=wheelRatio({deltaY:raw,deltaMode:e.deltaMode});
+      let axes=['s','t'];
+      if(name==='Torus' && board.contains($('prodTorusFactors'))){
+        const p=point(e,$('prodTorusFactors')),C=torusFactorCenters();
+        const ds=Math.hypot(p.x-C.s.x,p.y-C.s.y);
+        const dt=Math.hypot(p.x-C.t.x,p.y-C.t.y);
+        axes=[ds<=dt?'s':'t'];
+      }
+      if(name==='Torus')torusFreshCutId=null;
+      for(const axis of axes){
+        const k=axis==='s'?'rs':'rt';
+        o[k]=clamp(o[k]*ratio,.035,productRadiusLimit(o,axis));
+      }
+      renderProduct(name);
+    },{passive:false});
+  }
 }
 window.addEventListener('resize',()=>renderTorusFactors(productModels.Torus));
 // All palette and specimen collections are initialized before first render.
